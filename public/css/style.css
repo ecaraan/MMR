@@ -1,0 +1,16 @@
+.testClass
+{
+    text-align: center;
+    color: red;    
+}
+
+.header 
+{ 
+    margin: 0; 
+    padding: 20px;
+}
+
+.card
+{
+    max-width: 350px;
+}
