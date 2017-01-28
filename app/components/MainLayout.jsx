@@ -1,9 +1,9 @@
 var React = require('react');
-var Header = require('./header');
-var Footer = require('./footer');
-var Hero = require('./hero');
-var Section = require('./section');
-var Cards = require('./cards');
+var Header = require('./Header.jsx');
+var Footer = require('./Footer.jsx');
+var Hero = require('./Hero.jsx');
+var Section = require('./Section.jsx');
+var Cards = require('./Cards.jsx');
 
 var CardListItems = [
     {

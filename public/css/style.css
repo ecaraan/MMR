@@ -4,13 +4,13 @@
     color: red;    
 }
 
-.header 
+.Header 
 { 
     margin: 0; 
     padding: 20px;
 }
 
-.card
+.Card
 {
     max-width: 350px;
 }

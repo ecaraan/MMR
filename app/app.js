@@ -3,7 +3,7 @@ require('../public/css/style.css');
 
 var ReactDOM = require('react-dom');
 var React = require('react');
-var MainLayout = require('./components/mainlayout');
+var MainLayout = require('./components/MainLayout.jsx');
 
 ReactDOM.render(<MainLayout />, document.getElementById('app'));
 

@@ -1,5 +1,5 @@
 var React = require('react');
-var Card = require('./card');
+var Card = require('./Card.jsx');
 
 var Cards = React.createClass({
   renderItems: function() {
