@@ -3,7 +3,7 @@ var React = require('react');
 var About = React.createClass({
     render: function(){
         return (
-            <div>
+            <div style={{margin: "20px"}}>
                 About
             </div>
         );

@@ -1,6 +1,8 @@
 import { Router, Route, IndexRoute, browserHistory } from 'react-router'
 import 'bootstrap/dist/css/bootstrap.css';
 
+
+
 require('../public/css/style.css');
 require('../public/css/card.css');
 
@@ -21,18 +23,5 @@ ReactDOM.render((
   </Router>
 ), document.getElementById('app'));
 
-// const routes = {
-//   path: '/',
-//   component: MainLayout,
-//   indexRoute: { component: Home },
-//   childRoutes: [
-//     { path: 'tasks', component: Tasks },
-//     { path: 'about', component: About },
-//   ]
-// }
-
-// ReactDOM.render(<Router history={history} routes={routes} />, document.getElementById('app'))
-
-// ReactDOM.render(<MainLayout />, document.getElementById('app'));
 
 
