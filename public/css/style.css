@@ -19,3 +19,7 @@
     padding: 0;
     margin: 0;
 }
+
+.modal-action-buttons > button{
+    min-width: 80px;
+}

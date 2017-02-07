@@ -1,8 +1,6 @@
 import { Router, Route, IndexRoute, browserHistory } from 'react-router'
 import 'bootstrap/dist/css/bootstrap.css';
 
-
-
 require('../public/css/style.css');
 require('../public/css/card.css');
 
