@@ -6,6 +6,7 @@ import { Modal } from 'react-bootstrap';
 var Tasks = React.createClass({
     getInitialState() {
         return { 
+            itemToEditId: null,
             showModal: false,
             pList : [{Id: 1, Name: 'Low'}, 
                     {Id: 2, Name: 'Medium'}, 
@@ -22,32 +23,84 @@ var Tasks = React.createClass({
     },
     openModal() {
         this.setState({ showModal: true });
-    },
+    },    
     addNewItem() {
         var id = _.max(_.map(this.state.tList, 'Id'));      
         var taskList = this.state.tList.slice();
 
         taskList.push({
             Id : (id || 0) + 1, 
-            Name : document.getElementById('taskName').value,
-            Description : document.getElementById('taskDescription').value,
-            Priority : parseInt(document.getElementById('taskPriority').value),
-            Status : parseInt(document.getElementById('taskStatus').value)
+            Name : this.refs['modal_taskName'].value,
+            Description : this.refs['modal_taskDescription'].value,
+            Priority : parseInt(this.refs['modal_taskPriority'].value),
+            Status : parseInt(this.refs['modal_taskStatus'].value)
         });
 
         //persist to storage
         localStorage.setItem('mmr_tasklist', JSON.stringify(taskList));
 
         this.setState({ showModal: false, tList: taskList });
-
     },
-    tablerows: function() {
-       
-       return this.state.tList.map((item) => { 
+    updateItem(){
+        var id = this.state.itemToEditId;      
+        var taskList = this.state.tList.slice();
+        var itemToUpdate = _.find(taskList, ['Id', id]);
 
-            var p = _.find(this.state.pList, ['Id', item.Priority]);
-            var s = _.find(this.state.sList, ['Id', item.Status]);
+        itemToUpdate.Name = this.refs['editName_' + id].value,
+        itemToUpdate.Description = this.refs['editDescription_' + id].value,
+        itemToUpdate.Priority = parseInt(this.refs['editPriority_' + id].value),
+        itemToUpdate.Status = parseInt(this.refs['editStatus_' + id].value)
 
+        //persist to storage
+        localStorage.setItem('mmr_tasklist', JSON.stringify(taskList));
+
+        this.setState({ tList: taskList, itemToEditId: null });
+    },
+    toggleEditing(id) {
+        this.setState( { itemToEditId: id } );
+    },
+    displayOrEdit(item){
+
+        var p = _.find(this.state.pList, ['Id', item.Priority]);
+        var s = _.find(this.state.sList, ['Id', item.Status]);
+
+        if ( this.state.itemToEditId === item.Id ) {
+             return  <tr key={item.Id}>
+                        <td>
+                            <input ref={`editName_${item.Id}`} className="form-control" defaultValue={item.Name} />
+                            <textarea ref={`editDescription_${item.Id}`} className="form-control" defaultValue={item.Description} />  
+                        </td>
+                        <td>
+                            <select ref={`editPriority_${item.Id}`} defaultValue={item.Priority || "0"} className="form-control">
+                                <option value="0" disabled hidden>Priority</option>
+                                <option value="1">Low</option>
+                                <option value="2">Medium</option>
+                                <option value="3">High</option>                          
+                            </select>
+                        </td>
+                        <td>
+                            <select ref={`editStatus_${item.Id}`} defaultValue={item.Status || "0"} className="form-control">
+                                <option value="0" disabled hidden>Status</option>
+                                <option value="1">To Do</option>
+                                <option value="2">In Progress</option>
+                                <option value="3">Done</option>                          
+                            </select>
+                        </td>
+                        <td>
+                            <div className="btn-toolbar" role="toolbar">
+                                <div className="btn-group" role="group">
+                                    <button className="btn btn-success">
+                                        <span className="glyphicon glyphicon-floppy-save" onClick={this.updateItem}></span>
+                                    </button>
+                                    <button className="btn btn-danger" onClick={this.toggleEditing.bind(null, 0)}>
+                                        <span className="glyphicon glyphicon-remove"></span>
+                                    </button>
+                                </div>
+                            </div>                            
+                        </td>
+                    </tr>;
+        } 
+        else {
             return  <tr key={item.Id}>
                         <td>
                             {item.Name}<br/>
@@ -58,7 +111,7 @@ var Tasks = React.createClass({
                         <td>
                             <div className="btn-toolbar" role="toolbar">
                                 <div className="btn-group" role="group">
-                                    <button className="btn btn-primary">
+                                    <button className="btn btn-primary" onClick={this.toggleEditing.bind(null, item.Id)}>
                                         <span className="glyphicon glyphicon-edit"></span>
                                     </button>
                                     <button className="btn btn-danger">
@@ -68,9 +121,14 @@ var Tasks = React.createClass({
                             </div>                            
                         </td>
                     </tr>;
+        }
+    },   
+    tablerows() {       
+       return this.state.tList.map((item) => { 
+           return this.displayOrEdit(item);
         });
     },
-    render: function(){
+    render() {
         return (
             <div className = "panel panel-primary" style={{margin:"20px"}}>
                 <div className = "panel-heading">
@@ -100,13 +158,13 @@ var Tasks = React.createClass({
                         <Modal.Body>
                             <form>
                                 <div className="form-group">
-                                    <input id="taskName" className="form-control" placeholder="Enter Task Name" />  
+                                    <input ref="modal_taskName" className="form-control" placeholder="Enter Task Name" />  
                                 </div>   
                                 <div className="form-group">                           
-                                    <textarea id="taskDescription" className="form-control" placeholder="Enter Task Description" />                                    
+                                    <textarea ref="modal_taskDescription" className="form-control" placeholder="Enter Task Description" />                                    
                                 </div>
                                 <div className="form-group"> 
-                                    <select placeholder="select" id="taskPriority" className="form-control">
+                                    <select placeholder="select" ref="modal_taskPriority" className="form-control">
                                         <option value="0" disabled selected hidden>Priority</option>
                                         <option value="1">Low</option>
                                         <option value="2">Medium</option>
@@ -114,7 +172,7 @@ var Tasks = React.createClass({
                                     </select> 
                                 </div>
                                 <div className="form-group"> 
-                                    <select placeholder="select" id="taskStatus" className="form-control">
+                                    <select placeholder="select" ref="modal_taskStatus" className="form-control">
                                         <option value="" disabled selected hidden>Status</option>
                                         <option value="1">To Do</option>
                                         <option value="2">In Progress</option>
