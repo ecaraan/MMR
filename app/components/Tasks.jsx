@@ -42,8 +42,9 @@ var Tasks = React.createClass({
         this.setState({ showModal: false, tList: taskList });
     },
     updateItem(){
-        var id = this.state.itemToEditId;      
+        var id = this.state.itemToEditId; 
         var taskList = this.state.tList.slice();
+        
         var itemToUpdate = _.find(taskList, ['Id', id]);
 
         itemToUpdate.Name = this.refs['editName_' + id].value;
@@ -54,7 +55,7 @@ var Tasks = React.createClass({
         //persist to storage
         localStorage.setItem('mmr_tasklist', JSON.stringify(taskList));
 
-        this.setState({ tList: taskList, itemToEditId: null });
+        this.setState({ tList: taskList, itemToEditId: null });        
     },
     toggleEditing(id) {
         this.setState( { itemToEditId: id } );
@@ -89,8 +90,8 @@ var Tasks = React.createClass({
                         <td>
                             <div className="btn-toolbar" role="toolbar">
                                 <div className="btn-group" role="group">
-                                    <button className="btn btn-success">
-                                        <span className="glyphicon glyphicon-floppy-save" onClick={this.updateItem}></span>
+                                    <button className="btn btn-success" onClick={this.updateItem}>
+                                        <span className="glyphicon glyphicon-floppy-save"></span>
                                     </button>
                                     <button className="btn btn-danger" onClick={this.toggleEditing.bind(null, 0)}>
                                         <span className="glyphicon glyphicon-remove"></span>
