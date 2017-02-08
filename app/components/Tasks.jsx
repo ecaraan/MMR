@@ -46,10 +46,10 @@ var Tasks = React.createClass({
         var taskList = this.state.tList.slice();
         var itemToUpdate = _.find(taskList, ['Id', id]);
 
-        itemToUpdate.Name = this.refs['editName_' + id].value,
-        itemToUpdate.Description = this.refs['editDescription_' + id].value,
-        itemToUpdate.Priority = parseInt(this.refs['editPriority_' + id].value),
-        itemToUpdate.Status = parseInt(this.refs['editStatus_' + id].value)
+        itemToUpdate.Name = this.refs['editName_' + id].value;
+        itemToUpdate.Description = this.refs['editDescription_' + id].value;
+        itemToUpdate.Priority = parseInt(this.refs['editPriority_' + id].value);
+        itemToUpdate.Status = parseInt(this.refs['editStatus_' + id].value);
 
         //persist to storage
         localStorage.setItem('mmr_tasklist', JSON.stringify(taskList));
