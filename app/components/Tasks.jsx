@@ -3,60 +3,18 @@ var _ = require('lodash');
 
 import { Modal } from 'react-bootstrap';
 
-function TaskItem(id, name, description, priority, status){
-    this.Id = id;
-    this.Name = name;
-    this.Description = description;
-    this.Priority = priority;
-    this.Status = status;    
-}
-
-function Priority(id, name){
-    this.Id = id;
-    this.Name = name;
-}
-
-function Status(id, name){
-    this.Id = id;
-    this.Name = name;
-}
-
-var taskList = [], priorityList = [], statusList = [];
-
-//task list
-taskList.push(new TaskItem(1, 'Name 1', 'Description 1', 1, 1));
-taskList.push(new TaskItem(2, 'Name 2', 'Description 2', 2, 2));
-taskList.push(new TaskItem(3, 'Name 3', 'Description 3', 3, 3));
-taskList.push(new TaskItem(4, 'Name 4', 'Description 3', 3, 3));
-
-
-//priorities
-priorityList.push(new Priority(1, 'Low'));
-priorityList.push(new Priority(2, 'Medium'));
-priorityList.push(new Priority(3, 'High'));
-
-//status
-statusList.push(new Status(1, 'To Do'));
-statusList.push(new Status(2, 'In Progress'));
-statusList.push(new Status(3, 'Done'));
-
-sessionStorage.setItem('tasklist', JSON.stringify(taskList));
-sessionStorage.setItem('prioritylist', JSON.stringify(priorityList));
-sessionStorage.setItem('statuslist', JSON.stringify(statusList));
-
 var Tasks = React.createClass({
-    // getDefaultProps(){
-    //     return {
-    //         pList : JSON.parse(sessionStorage.getItem('prioritylist') || []),
-    //         sList : JSON.parse(sessionStorage.getItem('statuslist') || [])
-    //     }
-    // },
     getInitialState() {
         return { 
             showModal: false,
-            pList : JSON.parse(sessionStorage.getItem('prioritylist') || []),
-            sList : JSON.parse(sessionStorage.getItem('statuslist') || []),
-            tList : JSON.parse(sessionStorage.getItem('tasklist') || [])           
+            pList : [{Id: 1, Name: 'Low'}, 
+                    {Id: 2, Name: 'Medium'}, 
+                    {Id: 3, Name: 'High'}],
+            sList : [{Id: 1, Name: 'To Do'}, 
+                    {Id: 2, Name: 'In Progress'}, 
+                    {Id: 3, Name: 'Done'}],
+            tList : typeof localStorage['mmr_tasklist'] == 'undefined' ? [] : 
+                    JSON.parse(localStorage.getItem('mmr_tasklist') || [])
         };
     },
     closeModal() {
@@ -66,11 +24,11 @@ var Tasks = React.createClass({
         this.setState({ showModal: true });
     },
     addNewItem() {
-        var id = _.max(_.map(this.state.tList, 'Id'));
-      
+        var id = _.max(_.map(this.state.tList, 'Id'));      
         var taskList = this.state.tList.slice();
+
         taskList.push({
-            Id : id + 1, 
+            Id : (id || 0) + 1, 
             Name : document.getElementById('taskName').value,
             Description : document.getElementById('taskDescription').value,
             Priority : parseInt(document.getElementById('taskPriority').value),
@@ -78,7 +36,7 @@ var Tasks = React.createClass({
         });
 
         //persist to storage
-        sessionStorage.setItem('tasklist', JSON.stringify(taskList));
+        localStorage.setItem('mmr_tasklist', JSON.stringify(taskList));
 
         this.setState({ showModal: false, tList: taskList });
 
