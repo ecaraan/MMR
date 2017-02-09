@@ -7,7 +7,10 @@ var Tasks = React.createClass({
     getInitialState() {
         return { 
             itemToEditId: null,
+            taskToRemoveId: null,
+            taskToRemoveName: null,
             showModal: false,
+            showConfirmModal: false,
             pList : [{Id: 1, Name: 'Low'}, 
                     {Id: 2, Name: 'Medium'}, 
                     {Id: 3, Name: 'High'}],
@@ -20,6 +23,9 @@ var Tasks = React.createClass({
     },
     closeModal() {
         this.setState({ showModal: false });
+    },
+    closeConfirmModal() {
+        this.setState({ showConfirmModal: false });
     },
     openModal() {
         this.setState({ showModal: true });
@@ -41,20 +47,19 @@ var Tasks = React.createClass({
 
         this.setState({ showModal: false, tList: taskList });
     },
-    removeItem(id){
-        var itemToRemove = _.find(this.state.tList, ['Id', id]);        
-        //var r = confirm("Remove the task, '" + itemToRemove.Name + "' from the list?");
+    confirmRemove(id){
+        var itemToRemove = _.find(this.state.tList, ['Id', id]);
+        this.setState({ showConfirmModal: true, taskToRemoveId: id, taskToRemoveName: itemToRemove.Name});
+    },
+    removeItem(){
+        var taskList = this.state.tList.slice();
 
-        // if (r == true) {
-            var taskList = this.state.tList.slice();
+        _.remove(taskList, ['Id', this.state.taskToRemoveId]);
 
-            _.remove(taskList, ['Id', id]);
+        //persist to storage
+        localStorage.setItem('mmr_tasklist', JSON.stringify(taskList));
 
-            //persist to storage
-            localStorage.setItem('mmr_tasklist', JSON.stringify(taskList));
-
-            this.setState({ tList: taskList }); 
-        // } 
+        this.setState({ tList: taskList, showConfirmModal: false }); 
     },
     updateItem(){
         var id = this.state.itemToEditId; 
@@ -130,7 +135,7 @@ var Tasks = React.createClass({
                                     <button className="btn btn-primary" onClick={this.toggleEditing.bind(null, item.Id)}>
                                         <span className="glyphicon glyphicon-edit"></span>
                                     </button>
-                                    <button className="btn btn-danger" onClick={this.removeItem.bind(null, item.Id)}>
+                                    <button className="btn btn-danger" onClick={this.confirmRemove.bind(null, item.Id)}>
                                         <span className="glyphicon glyphicon-trash"></span>
                                     </button>
                                 </div>
@@ -201,6 +206,20 @@ var Tasks = React.createClass({
                             <div className="modal-action-buttons">
                                 <button onClick={this.addNewItem} className="btn btn-primary">Add</button>
                                 <button onClick={this.closeModal} className="btn btn-secondary">Cancel</button>
+                            </div>
+                        </Modal.Footer>
+                    </Modal>
+                    <Modal show={this.state.showConfirmModal} onHide={this.closeConfirmModal}>
+                        <Modal.Header closeButton>
+                            <Modal.Title>Are you sure?</Modal.Title>
+                        </Modal.Header>
+                        <Modal.Body>
+                            <p className="">Remove task, '{this.state.taskToRemoveName}' from the list?</p>
+                        </Modal.Body>
+                        <Modal.Footer>
+                            <div className="modal-action-buttons">
+                                <button onClick={this.removeItem} className="btn btn-primary">Yes</button>
+                                <button onClick={this.closeConfirmModal} className="btn btn-secondary">No</button>
                             </div>
                         </Modal.Footer>
                     </Modal>
