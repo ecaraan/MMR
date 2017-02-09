@@ -41,6 +41,21 @@ var Tasks = React.createClass({
 
         this.setState({ showModal: false, tList: taskList });
     },
+    removeItem(id){
+        var itemToRemove = _.find(this.state.tList, ['Id', id]);        
+        //var r = confirm("Remove the task, '" + itemToRemove.Name + "' from the list?");
+
+        // if (r == true) {
+            var taskList = this.state.tList.slice();
+
+            _.remove(taskList, ['Id', id]);
+
+            //persist to storage
+            localStorage.setItem('mmr_tasklist', JSON.stringify(taskList));
+
+            this.setState({ tList: taskList }); 
+        // } 
+    },
     updateItem(){
         var id = this.state.itemToEditId; 
         var taskList = this.state.tList.slice();
@@ -115,7 +130,7 @@ var Tasks = React.createClass({
                                     <button className="btn btn-primary" onClick={this.toggleEditing.bind(null, item.Id)}>
                                         <span className="glyphicon glyphicon-edit"></span>
                                     </button>
-                                    <button className="btn btn-danger">
+                                    <button className="btn btn-danger" onClick={this.removeItem.bind(null, item.Id)}>
                                         <span className="glyphicon glyphicon-trash"></span>
                                     </button>
                                 </div>
