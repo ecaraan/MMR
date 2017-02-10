@@ -9,6 +9,8 @@ var Tasks = React.createClass({
             itemToEditId: null,
             taskToRemoveId: null,
             taskToRemoveName: null,
+            sortColumn: null,
+            sortOrder: null,
             showModal: false,
             showConfirmModal: false,
             pList : [{Id: 1, Name: 'Low'}, 
@@ -20,6 +22,20 @@ var Tasks = React.createClass({
             tList : typeof localStorage['mmr_tasklist'] == 'undefined' ? [] : 
                     JSON.parse(localStorage.getItem('mmr_tasklist') || [])
         };
+    },
+    sortTable(column){
+        let order, taskList = this.state.tList.slice();
+
+        if (this.state.sortColumn != column || this.state.sortOrder == null)
+            order = 'asc';
+        else
+            order = this.state.sortOrder == 'asc' ? 'desc' : 'asc';
+
+        this.setState({
+                sortColumn : column, 
+                sortOrder : order, 
+                tList : _.orderBy(taskList, [column], order)
+            });
     },
     closeModal() {
         this.setState({ showModal: false });
@@ -161,9 +177,18 @@ var Tasks = React.createClass({
                     <table className = "table table-striped">
                         <thead>
                             <tr>
-                                <th>Task Detail</th>
-                                <th>Priority</th>
-                                <th>Status</th>
+                                <th>
+                                    <a href="#" onClick={() => this.sortTable('Name')}>Task Detail </a>
+                                    <i className={`fa ${this.state.sortColumn == 'Name' ? 'fa-sort-' + this.state.sortOrder : 'fa-sort'}`}></i>
+                                </th>
+                                <th>
+                                    <a href="#" onClick={() => this.sortTable('Priority')}>Priority </a>
+                                    <i className={`fa ${this.state.sortColumn == 'Priority' ? 'fa-sort-' + this.state.sortOrder : 'fa-sort'}`}></i>
+                                </th>
+                                <th>
+                                    <a href="#" onClick={() => this.sortTable('Status')}>Status </a>
+                                    <i className={`fa ${this.state.sortColumn == 'Status' ? 'fa-sort-' + this.state.sortOrder : 'fa-sort'}`}></i>
+                                </th>
                                 <th></th>
                             </tr>
                         </thead>
