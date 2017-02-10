@@ -173,7 +173,6 @@ var Tasks = React.createClass({
         }
     },   
     tablerows() {                
-       //return this.state.tList.map((item) => { 
         return  (_.take(_.slice(this.state.tList, (this.state.currentPage - 1) * this.state.rowsPerPage), this.state.rowsPerPage)).map((item) => {           
            return this.displayOrEdit(item);
         });
@@ -209,11 +208,11 @@ var Tasks = React.createClass({
                             {this.tablerows()}
                         </tbody>
                     </table> 
-                    <div className="row">
-                         <div className="col-md-6">
+                    <div className="row" style={{borderStyle: "solid 1px"}}>
+                         <div className="col-md-9">
                             <button className="btn btn-primary" onClick={this.openModal}>Add New</button>
                          </div>
-                         <div className="col-md-6 pull-right">
+                         <div className="col-md-3">
                             <Pagination rowsPerPage={this.state.rowsPerPage} 
                                     totalRows={this.state.tList.length} 
                                     currentPage={this.state.currentPage}
