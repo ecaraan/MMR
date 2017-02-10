@@ -3,6 +3,8 @@ var _ = require('lodash');
 
 import { Modal } from 'react-bootstrap';
 
+var Pagination = require('./Pagination.jsx');
+
 var Tasks = React.createClass({
     getInitialState() {
         return { 
@@ -13,6 +15,8 @@ var Tasks = React.createClass({
             sortOrder: null,
             showModal: false,
             showConfirmModal: false,
+            currentPage: 1,
+            rowsPerPage: 5,
             pList : [{Id: 1, Name: 'Low'}, 
                     {Id: 2, Name: 'Medium'}, 
                     {Id: 3, Name: 'High'}],
@@ -34,8 +38,10 @@ var Tasks = React.createClass({
         this.setState({
                 sortColumn : column, 
                 sortOrder : order, 
-                tList : _.orderBy(taskList, [column], order)
+                tList : _.orderBy(taskList, [column], order),
+                currentPage: 1
             });
+
     },
     closeModal() {
         this.setState({ showModal: false });
@@ -92,6 +98,12 @@ var Tasks = React.createClass({
         localStorage.setItem('mmr_tasklist', JSON.stringify(taskList));
 
         this.setState({ tList: taskList, itemToEditId: null });        
+    },
+    onPageChanged(page){        
+        this.setState({currentPage: page});
+    },
+    onRowsPerPageChanged(count){
+        this.setState({rowsPerPage: count, currentPage: 1});
     },
     toggleEditing(id) {
         this.setState( { itemToEditId: id } );
@@ -160,8 +172,9 @@ var Tasks = React.createClass({
                     </tr>;
         }
     },   
-    tablerows() {       
-       return this.state.tList.map((item) => { 
+    tablerows() {                
+       //return this.state.tList.map((item) => { 
+        return  (_.take(_.slice(this.state.tList, (this.state.currentPage - 1) * this.state.rowsPerPage), this.state.rowsPerPage)).map((item) => {           
            return this.displayOrEdit(item);
         });
     },
@@ -195,8 +208,19 @@ var Tasks = React.createClass({
                         <tbody>
                             {this.tablerows()}
                         </tbody>
-                    </table>
-                    <button className="btn btn-primary" onClick={this.openModal}>Add New</button>
+                    </table> 
+                    <div className="row">
+                         <div className="col-md-6">
+                            <button className="btn btn-primary" onClick={this.openModal}>Add New</button>
+                         </div>
+                         <div className="col-md-6 pull-right">
+                            <Pagination rowsPerPage={this.state.rowsPerPage} 
+                                    totalRows={this.state.tList.length} 
+                                    currentPage={this.state.currentPage}
+                                    onPageChanged={this.onPageChanged} 
+                                    onRowsPerPageChanged={this.onRowsPerPageChanged} />
+                         </div>
+                    </div>
                     <Modal show={this.state.showModal} onHide={this.closeModal}>
                         <Modal.Header closeButton>
                             <Modal.Title>Add New Task</Modal.Title>
@@ -255,3 +279,7 @@ var Tasks = React.createClass({
 })
 
 module.exports = Tasks;
+
+// <Paginate recordCount={this.state.dataCount}
+//                        recrodsOnPage={5}
+//                        onPageChange={this.handlePageClick} />

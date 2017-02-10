@@ -23,3 +23,7 @@
 .modal-action-buttons > button{
     min-width: 80px;
 }
+
+ul.pagination{
+    margin-top: 0;
+}
