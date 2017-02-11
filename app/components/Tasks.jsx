@@ -70,6 +70,10 @@ class Tasks extends React.Component{
         this.setState({ showModal: true });
     }
 
+    getLastPage(totalRows, rowsPerPage) {
+        return Math.ceil(totalRows / rowsPerPage);
+    }
+
     addNewItem() {
         let id = _.max(_.map(this.state.tList, 'Id'));      
         let taskList = this.state.tList.slice();
@@ -85,7 +89,7 @@ class Tasks extends React.Component{
         //persist to storage
         localStorage.setItem('mmr_tasklist', JSON.stringify(taskList));
 
-        this.setState({ showModal: false, tList: taskList });
+        this.setState({ showModal: false, tList: taskList, currentPage: this.getLastPage(taskList.length, this.state.rowsPerPage) });
     }
 
     confirmRemove(id){
@@ -101,7 +105,12 @@ class Tasks extends React.Component{
         //persist to storage
         localStorage.setItem('mmr_tasklist', JSON.stringify(taskList));
 
-        this.setState({ tList: taskList, showConfirmModal: false }); 
+        //check if currentPage is valid
+        let isCurrentPageValid = this.state.currentPage <= this.getLastPage(taskList.length, this.state.rowsPerPage);
+
+        this.setState({ tList: taskList, 
+            showConfirmModal: false, 
+            currentPage: isCurrentPageValid ? this.state.currentPage : this.state.currentPage - 1 }); 
     }
 
     updateItem(){
