@@ -1,13 +1,14 @@
-var React = require('react');
-var _ = require('lodash');
+import React from 'react';
+import _  from 'lodash';
 
 import { Modal } from 'react-bootstrap';
+import Pagination from './Pagination.jsx';
 
-var Pagination = require('./Pagination.jsx');
+class Tasks extends React.Component{
 
-var Tasks = React.createClass({
-    getInitialState() {
-        return { 
+    constructor(props){
+        super(props);
+        this.state = {
             itemToEditId: null,
             taskToRemoveId: null,
             taskToRemoveName: null,
@@ -25,8 +26,21 @@ var Tasks = React.createClass({
                     {Id: 3, Name: 'Done'}],
             tList : typeof localStorage['mmr_tasklist'] == 'undefined' ? [] : 
                     JSON.parse(localStorage.getItem('mmr_tasklist') || [])
-        };
-    },
+        }
+
+        this.sortTable = this.sortTable.bind(this);
+        this.closeModal = this.closeModal.bind(this);
+        this.closeConfirmModal = this.closeConfirmModal.bind(this);
+        this.openModal = this.openModal.bind(this);
+        this.addNewItem = this.addNewItem.bind(this);
+        this.confirmRemove = this.confirmRemove.bind(this);
+        this.removeItem = this.removeItem.bind(this);
+        this.updateItem = this.updateItem.bind(this);
+        this.onPageChanged = this.onPageChanged.bind(this);
+        this.onRowsPerPageChanged = this.onRowsPerPageChanged.bind(this);
+        this.toggleEditing = this.toggleEditing.bind(this);
+    }
+    
     sortTable(column){
         let order, taskList = this.state.tList.slice();
 
@@ -42,19 +56,23 @@ var Tasks = React.createClass({
                 currentPage: 1
             });
 
-    },
+    }
+
     closeModal() {
         this.setState({ showModal: false });
-    },
+    }
+
     closeConfirmModal() {
         this.setState({ showConfirmModal: false });
-    },
+    }
+
     openModal() {
         this.setState({ showModal: true });
-    },    
+    }
+
     addNewItem() {
-        var id = _.max(_.map(this.state.tList, 'Id'));      
-        var taskList = this.state.tList.slice();
+        let id = _.max(_.map(this.state.tList, 'Id'));      
+        let taskList = this.state.tList.slice();
 
         taskList.push({
             Id : (id || 0) + 1, 
@@ -68,13 +86,15 @@ var Tasks = React.createClass({
         localStorage.setItem('mmr_tasklist', JSON.stringify(taskList));
 
         this.setState({ showModal: false, tList: taskList });
-    },
+    }
+
     confirmRemove(id){
-        var itemToRemove = _.find(this.state.tList, ['Id', id]);
+        let itemToRemove = _.find(this.state.tList, ['Id', id]);
         this.setState({ showConfirmModal: true, taskToRemoveId: id, taskToRemoveName: itemToRemove.Name});
-    },
+    }
+
     removeItem(){
-        var taskList = this.state.tList.slice();
+        let taskList = this.state.tList.slice();
 
         _.remove(taskList, ['Id', this.state.taskToRemoveId]);
 
@@ -82,12 +102,13 @@ var Tasks = React.createClass({
         localStorage.setItem('mmr_tasklist', JSON.stringify(taskList));
 
         this.setState({ tList: taskList, showConfirmModal: false }); 
-    },
+    }
+
     updateItem(){
-        var id = this.state.itemToEditId; 
-        var taskList = this.state.tList.slice();
+        let id = this.state.itemToEditId; 
+        let taskList = this.state.tList.slice();
         
-        var itemToUpdate = _.find(taskList, ['Id', id]);
+        let itemToUpdate = _.find(taskList, ['Id', id]);
 
         itemToUpdate.Name = this.refs['editName_' + id].value;
         itemToUpdate.Description = this.refs['editDescription_' + id].value;
@@ -98,20 +119,24 @@ var Tasks = React.createClass({
         localStorage.setItem('mmr_tasklist', JSON.stringify(taskList));
 
         this.setState({ tList: taskList, itemToEditId: null });        
-    },
+    }
+
     onPageChanged(page){        
         this.setState({currentPage: page});
-    },
+    }
+
     onRowsPerPageChanged(count){
         this.setState({rowsPerPage: count, currentPage: 1});
-    },
+    }
+
     toggleEditing(id) {
         this.setState( { itemToEditId: id } );
-    },
+    }
+
     displayOrEdit(item){
 
-        var p = _.find(this.state.pList, ['Id', item.Priority]);
-        var s = _.find(this.state.sList, ['Id', item.Status]);
+        let p = _.find(this.state.pList, ['Id', item.Priority]);
+        let s = _.find(this.state.sList, ['Id', item.Status]);
 
         if ( this.state.itemToEditId === item.Id ) {
              return  <tr key={item.Id}>
@@ -141,7 +166,7 @@ var Tasks = React.createClass({
                                     <button className="btn btn-success" onClick={this.updateItem}>
                                         <span className="glyphicon glyphicon-floppy-save"></span>
                                     </button>
-                                    <button className="btn btn-danger" onClick={this.toggleEditing.bind(null, 0)}>
+                                    <button className="btn btn-danger" onClick={() => this.toggleEditing(0)}>
                                         <span className="glyphicon glyphicon-remove"></span>
                                     </button>
                                 </div>
@@ -160,10 +185,10 @@ var Tasks = React.createClass({
                         <td>
                             <div className="btn-toolbar" role="toolbar">
                                 <div className="btn-group" role="group">
-                                    <button className="btn btn-primary" onClick={this.toggleEditing.bind(null, item.Id)}>
+                                    <button className="btn btn-primary" onClick={() => this.toggleEditing(item.Id)}>
                                         <span className="glyphicon glyphicon-edit"></span>
                                     </button>
-                                    <button className="btn btn-danger" onClick={this.confirmRemove.bind(null, item.Id)}>
+                                    <button className="btn btn-danger" onClick={() => this.confirmRemove(item.Id)}>
                                         <span className="glyphicon glyphicon-trash"></span>
                                     </button>
                                 </div>
@@ -171,12 +196,14 @@ var Tasks = React.createClass({
                         </td>
                     </tr>;
         }
-    },   
+    }
+        
     tablerows() {                
         return  (_.take(_.slice(this.state.tList, (this.state.currentPage - 1) * this.state.rowsPerPage), this.state.rowsPerPage)).map((item) => {           
            return this.displayOrEdit(item);
         });
-    },
+    }
+
     render() {
         return (
             <div className = "panel panel-primary" style={{margin:"20px"}}>
@@ -275,10 +302,6 @@ var Tasks = React.createClass({
             </div>            
         );
     }
-})
+}
 
-module.exports = Tasks;
-
-// <Paginate recordCount={this.state.dataCount}
-//                        recrodsOnPage={5}
-//                        onPageChange={this.handlePageClick} />
+export default Tasks;

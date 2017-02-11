@@ -1,7 +1,7 @@
-var React = require('react');
+import React from 'react';
 
-var Hero =  React.createClass({
-    render: function() {
+class Hero extends  React.Component{
+    render() {
         return (
             <div className="jumbotron">
                 <div className="container">
@@ -11,6 +11,6 @@ var Hero =  React.createClass({
             </div>
         );
     }
-});
+};
 
-module.exports = Hero;
+export default Hero;

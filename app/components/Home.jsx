@@ -1,9 +1,9 @@
-var React = require('react');
-var Hero = require('./Hero.jsx');
-var Section = require('./Section.jsx');
-var Cards = require('./Cards.jsx');
+import React from 'react';
+import Hero from './Hero.jsx';
+import Section from './Section.jsx';
+import Cards from './Cards.jsx';
 
-var CardListItems = [
+let CardListItems = [
     {
         title: "Card 1",
         description: "The quick brown fox... 1"
@@ -18,8 +18,8 @@ var CardListItems = [
     }
 ];
 
-var Home =  React.createClass({
-    render: function() {
+class Home extends React.Component{
+    render() {
         return (           
             <div>
                 <Hero />
@@ -28,6 +28,6 @@ var Home =  React.createClass({
             </div>            
         );
     }
-});
+};
 
-module.exports = Home;
+export default Home;

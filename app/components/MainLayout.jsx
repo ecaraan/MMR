@@ -1,13 +1,16 @@
-var React = require('react');
-var Header = require('./Header.jsx');
-var NavBar = require('./NavBar.jsx');
-var Footer = require('./Footer.jsx');
-var Home = require('./Home.jsx');
-var Tasks = require('./Tasks.jsx');
-var About = require('./About.jsx');
+import React from 'react';
+import Header from './Header.jsx';
+import NavBar from './NavBar.jsx';
+import Footer from './Footer.jsx';
+import Home from './Home.jsx';
+import Tasks from './Tasks.jsx';
+import About from './About.jsx';
 
-var MainLayout =  React.createClass({
-    render: function() {       
+class MainLayout extends React.Component{
+    constructor(props) {
+        super(props);
+    }
+    render() {       
         return ( 
             <div>
                 <Header />
@@ -15,8 +18,8 @@ var MainLayout =  React.createClass({
                 {this.props.children}
                 <Footer />
             </div>
-        );      
+        ); 
     }
-});
+};
 
-module.exports = MainLayout;
+export default MainLayout;

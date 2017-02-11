@@ -1,7 +1,7 @@
-var React = require('react');
+import React from 'react';
 
-var Section =  React.createClass({
-    render: function() {
+class Section extends React.Component{
+    render() {
         return (
             <div className="panel panel-default">
                 <div className="panel-body">
@@ -11,6 +11,6 @@ var Section =  React.createClass({
             </div>
         );
     }
-});
+}
 
-module.exports = Section;
+export default Section;

@@ -1,8 +1,13 @@
-var React = require('react');
-var Card = require('./Card.jsx');
+import React from 'react';
+import Card from './Card.jsx';
 
-var Cards = React.createClass({
-  renderItems: function() {
+class Cards extends React.Component{
+
+  constructor(props) {
+    super(props);
+  }
+  
+  renderItems() {
     return this.props.data.map(function(item) {
       return (
         <Card
@@ -10,14 +15,16 @@ var Cards = React.createClass({
           description={item.description} />
       );
     }, this);
-  },
-  render: function() {
+  }
+
+  render() {
     return (
       <div className="card-deck">     
         {this.renderItems()}
       </div>
     );
   }
-});
 
-module.exports = Cards;
+}
+
+export default Cards;

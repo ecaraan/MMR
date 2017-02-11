@@ -1,7 +1,12 @@
-var React = require('react');
+import React from 'react';
 
-var Card =  React.createClass({
-    render: function() {
+class Card extends React.Component{
+    
+    constructor(props){
+        super(props);
+    }
+
+    render() {
         return (           
             <div className="card">
                 <img className="card-img-top" src="http://placehold.it/320x150" alt="Card image cap" />                
@@ -13,6 +18,7 @@ var Card =  React.createClass({
             </div>            
         );
     }
-});
 
-module.exports = Card;
+}
+
+export default Card;

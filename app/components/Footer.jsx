@@ -1,7 +1,8 @@
-var React = require('react');
+import React from 'react';
 
-var Footer =  React.createClass({
-    render: function() {
+class Footer extends React.Component{
+
+    render() {
         return ( 
             <div style={{clear:"both", paddingTop:"10px"}}>    
                 <hr style={{padding:"0",margin:"10 0"}} />  
@@ -17,6 +18,7 @@ var Footer =  React.createClass({
             </div>
         );
     }
-});
 
-module.exports = Footer;
+}
+
+export default Footer;

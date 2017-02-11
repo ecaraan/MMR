@@ -1,23 +1,8 @@
-import { Link } from 'react-router'
+import React from 'react';
+import NavLink from './NavLink.jsx';
 
-var React = require('react');
-
-var NavLink = React.createClass({
-    contextTypes: {
-        router: React.PropTypes.func
-    },
-    render: function () {        
-        var isActive = this.context.router.isActive(this.props.to, true);
-        var className = isActive ? 'active' : '';
-        return <li className={className}><Link {...this.props} /></li>;
-    }
-
-});
-
-module.exports = NavLink;
-
-var NavBar =  React.createClass({
-    render: function() {
+class NavBar extends React.Component{
+    render() {
         return (
             <nav className="navbar navbar-default">
                 <div className="container-fluid">                    
@@ -30,6 +15,6 @@ var NavBar =  React.createClass({
             </nav>        
         );
     }
-});
+}
 
-module.exports = NavBar;
+export default NavBar;

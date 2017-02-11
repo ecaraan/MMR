@@ -1,4 +1,4 @@
-const webpack = require('webpack');
+import webpack from 'webpack';
 
 const config = {
     devtool: 'inline-source-map',
@@ -68,5 +68,5 @@ if (process.env.NODE_ENV === 'production'){
     ]
 }
 
-module.exports = config;
+export default config;
 

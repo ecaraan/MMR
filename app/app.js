@@ -1,15 +1,15 @@
-import { Router, Route, IndexRoute, browserHistory } from 'react-router'
 import 'bootstrap/dist/css/bootstrap.css';
+import '../public/css/style.css';
+import '../public/css/card.css';
 
-require('../public/css/style.css');
-require('../public/css/card.css');
+import { Router, Route, IndexRoute, browserHistory } from 'react-router';
 
-var ReactDOM = require('react-dom');
-var React = require('react');
-var MainLayout = require('./components/MainLayout.jsx');
-var Home = require('./components/Home.jsx');
-var Tasks = require('./components/Tasks.jsx');
-var About = require('./components/About.jsx');
+import ReactDOM from 'react-dom';
+import React from 'react';
+import MainLayout from './components/MainLayout.jsx';
+import Home from './components/Home.jsx';
+import Tasks from './components/Tasks.jsx';
+import About from './components/About.jsx';
 
 ReactDOM.render((
   <Router history={browserHistory}>

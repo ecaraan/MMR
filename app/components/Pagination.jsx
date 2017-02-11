@@ -1,16 +1,22 @@
-var React = require('react');
+import React from 'react';
 
-var Pagination = React.createClass({  
-    getInitialState(){
-        return{
+class Pagination extends React.Component{
+    constructor(props) {
+        super(props);
+        this.state = {
             rowsPerPage: this.props.rowsPerPage,
             totalRows: this.props.totalRows,
             lastPage: Math.ceil(this.props.totalRows / this.props.rowsPerPage)
-        };
-    },
+        }
+
+        this.onPageChanged = this.onPageChanged.bind(this);
+        this.onRowsPerPageChanged = this.onRowsPerPageChanged.bind(this);
+    }
+
     onPageChanged(page){
         this.props.onPageChanged(page);
-    },
+    }
+
     onRowsPerPageChanged(){
         let rPerPage = this.refs['customRowsPerPage'].value;
 
@@ -18,7 +24,8 @@ var Pagination = React.createClass({
         this.setState({rowsPerPage: rPerPage,
             lastPage: Math.ceil(this.props.totalRows / rPerPage)
         });
-    },
+    }
+
     render(){
         return <div>
             <div>
@@ -36,6 +43,6 @@ var Pagination = React.createClass({
             </div>
         </div>
     }
-})
+}
 
-module.exports = Pagination;
+export default Pagination;
