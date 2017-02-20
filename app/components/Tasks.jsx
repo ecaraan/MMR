@@ -1,8 +1,9 @@
 import React from 'react';
 import _  from 'lodash';
-
 import { Modal } from 'react-bootstrap';
 import Pagination from './Pagination.jsx';
+import TaskStore from '../stores/TaskStore';
+import * as TaskAction from '../actions/TaskAction';
 
 class Tasks extends React.Component{
 
@@ -17,28 +18,40 @@ class Tasks extends React.Component{
             showModal: false,
             showConfirmModal: false,
             currentPage: 1,
-            rowsPerPage: 5,
-            pList : [{Id: 1, Name: 'Low'}, 
-                    {Id: 2, Name: 'Medium'}, 
-                    {Id: 3, Name: 'High'}],
-            sList : [{Id: 1, Name: 'To Do'}, 
-                    {Id: 2, Name: 'In Progress'}, 
-                    {Id: 3, Name: 'Done'}],
-            tList : typeof localStorage['mmr_tasklist'] == 'undefined' ? [] : 
-                    JSON.parse(localStorage.getItem('mmr_tasklist') || [])
+            rowsPerPage: 5,            
+            tList : TaskStore.getTasks()
         }
 
         this.sortTable = this.sortTable.bind(this);
+
         this.closeModal = this.closeModal.bind(this);
         this.closeConfirmModal = this.closeConfirmModal.bind(this);
         this.openModal = this.openModal.bind(this);
-        this.addNewItem = this.addNewItem.bind(this);
+
+        this.handleAddTask = this.handleAddTask.bind(this);
+        this.handleUpdateTask = this.handleUpdateTask.bind(this);
+        this.handleRemoveTask = this.handleRemoveTask.bind(this);
+
         this.confirmRemove = this.confirmRemove.bind(this);
-        this.removeItem = this.removeItem.bind(this);
-        this.updateItem = this.updateItem.bind(this);
+
         this.onPageChanged = this.onPageChanged.bind(this);
         this.onRowsPerPageChanged = this.onRowsPerPageChanged.bind(this);
+
         this.toggleEditing = this.toggleEditing.bind(this);
+
+        this.setTasksFromStore = this.setTasksFromStore.bind(this);
+    }
+    
+    setTasksFromStore() {
+        this.setState({ tList: TaskStore.getTasks() });
+    }
+
+    componentWillMount() {
+        TaskStore.on('change', this.setTasksFromStore);
+    }
+
+    componentWillUnmount() {
+        TasksStore.removeListener('change', this.setTasksFromStore);
     }
     
     sortTable(column){
@@ -74,61 +87,46 @@ class Tasks extends React.Component{
         return Math.ceil(totalRows / rowsPerPage);
     }
 
-    addNewItem() {
-        let id = _.max(_.map(this.state.tList, 'Id'));      
-        let taskList = this.state.tList.slice();
-
-        taskList.push({
-            Id : (id || 0) + 1, 
-            Name : this.refs['modal_taskName'].value,
-            Description : this.refs['modal_taskDescription'].value,
-            Priority : parseInt(this.refs['modal_taskPriority'].value),
-            Status : parseInt(this.refs['modal_taskStatus'].value)
+    handleAddTask(){
+        TaskAction.addTask({
+            name : this.refs['modal_taskName'].value,
+            description : this.refs['modal_taskDescription'].value,
+            priority : parseInt(this.refs['modal_taskPriority'].value),
+            status : parseInt(this.refs['modal_taskStatus'].value)
         });
+        
+       this.setState({ showModal: false, currentPage: this.getLastPage(TaskStore.getTasks().length, this.state.rowsPerPage) });
 
-        //persist to storage
-        localStorage.setItem('mmr_tasklist', JSON.stringify(taskList));
+    }
 
-        this.setState({ showModal: false, tList: taskList, currentPage: this.getLastPage(taskList.length, this.state.rowsPerPage) });
+    handleUpdateTask(){
+        let id = this.state.itemToEditId;
+
+        TaskAction.updateTask({
+            id: id,
+            name: this.refs['editName_' + id].value,
+            description : this.refs['editDescription_' + id].value,
+            priority : parseInt(this.refs['editPriority_' + id].value),
+            status : parseInt(this.refs['editStatus_' + id].value)
+        })
+
+        this.setState({ itemToEditId: null });        
+    }
+
+    handleRemoveTask(){
+        TaskAction.deleteTask(this.state.taskToRemoveId);
+
+        //check if currentPage is valid
+        let isCurrentPageValid = this.state.currentPage <= this.getLastPage(TaskStore.getTasks().length, this.state.rowsPerPage);
+
+        this.setState({ showConfirmModal: false, 
+            currentPage: isCurrentPageValid ? this.state.currentPage : this.state.currentPage - 1 }); 
     }
 
     confirmRemove(id){
         let itemToRemove = _.find(this.state.tList, ['Id', id]);
         this.setState({ showConfirmModal: true, taskToRemoveId: id, taskToRemoveName: itemToRemove.Name});
-    }
-
-    removeItem(){
-        let taskList = this.state.tList.slice();
-
-        _.remove(taskList, ['Id', this.state.taskToRemoveId]);
-
-        //persist to storage
-        localStorage.setItem('mmr_tasklist', JSON.stringify(taskList));
-
-        //check if currentPage is valid
-        let isCurrentPageValid = this.state.currentPage <= this.getLastPage(taskList.length, this.state.rowsPerPage);
-
-        this.setState({ tList: taskList, 
-            showConfirmModal: false, 
-            currentPage: isCurrentPageValid ? this.state.currentPage : this.state.currentPage - 1 }); 
-    }
-
-    updateItem(){
-        let id = this.state.itemToEditId; 
-        let taskList = this.state.tList.slice();
-        
-        let itemToUpdate = _.find(taskList, ['Id', id]);
-
-        itemToUpdate.Name = this.refs['editName_' + id].value;
-        itemToUpdate.Description = this.refs['editDescription_' + id].value;
-        itemToUpdate.Priority = parseInt(this.refs['editPriority_' + id].value);
-        itemToUpdate.Status = parseInt(this.refs['editStatus_' + id].value);
-
-        //persist to storage
-        localStorage.setItem('mmr_tasklist', JSON.stringify(taskList));
-
-        this.setState({ tList: taskList, itemToEditId: null });        
-    }
+    }   
 
     onPageChanged(page){        
         this.setState({currentPage: page});
@@ -144,8 +142,8 @@ class Tasks extends React.Component{
 
     displayOrEdit(item){
 
-        let p = _.find(this.state.pList, ['Id', item.Priority]);
-        let s = _.find(this.state.sList, ['Id', item.Status]);
+        let p = _.find(TaskStore.getPrioritiesEnum(), ['Id', item.Priority]);
+        let s = _.find(TaskStore.getStatusEnum(), ['Id', item.Status]);
 
         if ( this.state.itemToEditId === item.Id ) {
              return  <tr key={item.Id}>
@@ -155,7 +153,7 @@ class Tasks extends React.Component{
                         </td>
                         <td>
                             <select ref={`editPriority_${item.Id}`} defaultValue={item.Priority || "0"} className="form-control">
-                                <option value="0" disabled hidden>Priority</option>
+                                <option value="0" disabled hidden>Priority</option>                                
                                 <option value="1">Low</option>
                                 <option value="2">Medium</option>
                                 <option value="3">High</option>                          
@@ -172,7 +170,7 @@ class Tasks extends React.Component{
                         <td>
                             <div className="btn-toolbar" role="toolbar">
                                 <div className="btn-group" role="group">
-                                    <button className="btn btn-success" onClick={this.updateItem}>
+                                    <button className="btn btn-success" onClick={this.handleUpdateTask}>
                                         <span className="glyphicon glyphicon-floppy-save"></span>
                                     </button>
                                     <button className="btn btn-danger" onClick={() => this.toggleEditing(0)}>
@@ -288,7 +286,7 @@ class Tasks extends React.Component{
                         </Modal.Body>
                         <Modal.Footer>
                             <div className="modal-action-buttons">
-                                <button onClick={this.addNewItem} className="btn btn-primary">Add</button>
+                                <button onClick={this.handleAddTask} className="btn btn-primary">Add</button>
                                 <button onClick={this.closeModal} className="btn btn-secondary">Cancel</button>
                             </div>
                         </Modal.Footer>
@@ -302,7 +300,7 @@ class Tasks extends React.Component{
                         </Modal.Body>
                         <Modal.Footer>
                             <div className="modal-action-buttons">
-                                <button onClick={this.removeItem} className="btn btn-primary">Yes</button>
+                                <button onClick={this.handleRemoveTask} className="btn btn-primary">Yes</button>
                                 <button onClick={this.closeConfirmModal} className="btn btn-secondary">No</button>
                             </div>
                         </Modal.Footer>

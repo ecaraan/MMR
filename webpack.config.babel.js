@@ -8,6 +8,9 @@ const config = {
         publicPath: '/js/',
         filename: 'bundle.js'
     },
+    resolve: {
+        extensions: ['', '.js', '.jsx']
+    },
     module: {
         loaders: [
             {
