@@ -3,7 +3,9 @@ import _  from 'lodash';
 import { Modal } from 'react-bootstrap';
 import Pagination from './Pagination.jsx';
 import TaskStore from '../stores/TaskStore';
+import TaskPageStore from '../stores/TaskPageStore';
 import * as TaskAction from '../actions/TaskAction';
+import * as PageAction from '../actions/PageAction';
 
 class Tasks extends React.Component{
 
@@ -17,8 +19,8 @@ class Tasks extends React.Component{
             sortOrder: null,
             showModal: false,
             showConfirmModal: false,
-            currentPage: 1,
-            rowsPerPage: 5,            
+            currentPage: TaskPageStore.getCurrentPage(),
+            rowsPerPage: TaskPageStore.getRowsPerPage(),
             tList : TaskStore.getTasks()
         }
 
@@ -33,25 +35,30 @@ class Tasks extends React.Component{
         this.handleRemoveTask = this.handleRemoveTask.bind(this);
 
         this.confirmRemove = this.confirmRemove.bind(this);
-
-        this.onPageChanged = this.onPageChanged.bind(this);
-        this.onRowsPerPageChanged = this.onRowsPerPageChanged.bind(this);
-
+        
         this.toggleEditing = this.toggleEditing.bind(this);
 
         this.setTasksFromStore = this.setTasksFromStore.bind(this);
+        this.setPagingFromStore = this.setPagingFromStore.bind(this);
     }
     
     setTasksFromStore() {
         this.setState({ tList: TaskStore.getTasks() });
     }
 
+    setPagingFromStore(){
+        this.setState({rowsPerPage: TaskPageStore.getRowsPerPage(), 
+            currentPage: TaskPageStore.getCurrentPage()});
+    }
+
     componentWillMount() {
         TaskStore.on('change', this.setTasksFromStore);
+        TaskPageStore.on('change', this.setPagingFromStore);
     }
 
     componentWillUnmount() {
         TasksStore.removeListener('change', this.setTasksFromStore);
+        TasksPageStore.removeListener('change', this.setPagingFromStore);
     }
     
     sortTable(column){
@@ -65,9 +72,10 @@ class Tasks extends React.Component{
         this.setState({
                 sortColumn : column, 
                 sortOrder : order, 
-                tList : _.orderBy(taskList, [column], order),
-                currentPage: 1
+                tList : _.orderBy(taskList, [column], order)
             });
+
+        PageAction.setCurrentPage(1);
 
     }
 
@@ -95,8 +103,10 @@ class Tasks extends React.Component{
             status : parseInt(this.refs['modal_taskStatus'].value)
         });
         
-       this.setState({ showModal: false, currentPage: this.getLastPage(TaskStore.getTasks().length, this.state.rowsPerPage) });
+       PageAction.goToLastPage();
 
+       this.setState({ showModal: false});
+       
     }
 
     handleUpdateTask(){
@@ -119,22 +129,19 @@ class Tasks extends React.Component{
         //check if currentPage is valid
         let isCurrentPageValid = this.state.currentPage <= this.getLastPage(TaskStore.getTasks().length, this.state.rowsPerPage);
 
-        this.setState({ showConfirmModal: false, 
-            currentPage: isCurrentPageValid ? this.state.currentPage : this.state.currentPage - 1 }); 
+        if (isCurrentPageValid){
+            this.setState({ showConfirmModal: false});
+        }
+        else{
+            PageAction.goToPage(this.state.currentPage - 1);
+            this.setState({ showConfirmModal: false});
+        }        
     }
 
     confirmRemove(id){
         let itemToRemove = _.find(this.state.tList, ['Id', id]);
         this.setState({ showConfirmModal: true, taskToRemoveId: id, taskToRemoveName: itemToRemove.Name});
     }   
-
-    onPageChanged(page){        
-        this.setState({currentPage: page});
-    }
-
-    onRowsPerPageChanged(count){
-        this.setState({rowsPerPage: count, currentPage: 1});
-    }
 
     toggleEditing(id) {
         this.setState( { itemToEditId: id } );
@@ -247,11 +254,7 @@ class Tasks extends React.Component{
                             <button className="btn btn-primary" onClick={this.openModal}>Add New</button>
                          </div>
                          <div className="col-md-3">
-                            <Pagination rowsPerPage={this.state.rowsPerPage} 
-                                    totalRows={this.state.tList.length} 
-                                    currentPage={this.state.currentPage}
-                                    onPageChanged={this.onPageChanged} 
-                                    onRowsPerPageChanged={this.onRowsPerPageChanged} />
+                            <Pagination />
                          </div>
                     </div>
                     <Modal show={this.state.showModal} onHide={this.closeModal}>

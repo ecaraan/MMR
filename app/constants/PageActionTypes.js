@@ -1,0 +1,9 @@
+const PageActionTypes = {
+    GOTO_FIRSTPAGE: 'GOTO_FIRSTPAGE',
+    GOTO_LASTPAGE: 'GOTO_LASTPAGE',
+    GOTO_PAGE: 'GOTO_PAGE',
+    SET_ROWSPERPAGE: 'SET_ROWSPERPAGE',
+    SET_CURRENTPAGE: 'SET_CURRENTPAGE'
+}
+
+export default PageActionTypes;

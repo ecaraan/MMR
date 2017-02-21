@@ -44,7 +44,7 @@ class TaskStore extends EventEmitter {
         this._state.tasks.push({
             Id : (id || 0) + 1, 
             Name : task.name,
-            Description : task.decription,
+            Description : task.description,
             Priority : task.priority,
             Status : task.status
         });
@@ -65,7 +65,7 @@ class TaskStore extends EventEmitter {
         let itemToUpdate = _.find(this._state.tasks, ['Id', task.id]);
 
         itemToUpdate.Name = task.name,
-        itemToUpdate.Description = task.decription,
+        itemToUpdate.Description = task.description,
         itemToUpdate.Priority = task.priority,
         itemToUpdate.Status = task.status
 
