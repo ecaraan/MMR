@@ -15,8 +15,8 @@ ReactDOM.render((
   <Router history={browserHistory}>
     <Route path="/" component={MainLayout}>
       <IndexRoute component={Home} />
-      <Route path="tasks" component={Tasks} />
-      <Route path="about" component={About} />
+      <Route path="/tasks" component={Tasks} />
+      <Route path="/about" component={About} />
     </Route>
   </Router>
 ), document.getElementById('app'));

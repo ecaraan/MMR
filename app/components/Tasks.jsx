@@ -57,8 +57,8 @@ class Tasks extends React.Component{
     }
 
     componentWillUnmount() {
-        TasksStore.removeListener('change', this.setTasksFromStore);
-        TasksPageStore.removeListener('change', this.setPagingFromStore);
+        TaskStore.removeListener('change', this.setTasksFromStore);
+        TaskPageStore.removeListener('change', this.setPagingFromStore);
     }
     
     sortTable(column){
@@ -106,7 +106,7 @@ class Tasks extends React.Component{
        PageAction.goToLastPage();
 
        this.setState({ showModal: false});
-       
+
     }
 
     handleUpdateTask(){
