@@ -1,6 +1,7 @@
 import React from 'react';
 import { NavDropdown, MenuItem, OverlayTrigger, Button, Popover } from 'react-bootstrap';
 import TaskStore from '../stores/TaskStore';
+import _ from 'lodash';
 
 class PriorityPopOverMenu extends React.Component{
     constructor()
@@ -12,6 +13,8 @@ class PriorityPopOverMenu extends React.Component{
         };
 
         this.setTasksFromStore = this.setTasksFromStore.bind(this);
+        //this.getIconColor =  this.getIconColor.bind(this);
+        //this.showPopOver = this.showPopOver.bind(this);
     }
 
     setTasksFromStore() {
@@ -26,18 +29,53 @@ class PriorityPopOverMenu extends React.Component{
         TaskStore.removeListener('change', this.setTasksFromStore);
     }
 
-    showPopOver(priority) {
+    getIconColor(priority){
+        let iconColor = 'black';
+        let p = _.find(TaskStore.getPrioritiesEnum(), { 'Id' : priority });
 
-        let priorityId = _.find(TaskStore.getPrioritiesEnum(), { 'Name' : priority }).Id;
+        if (p)
+        {
+            switch(p.Name){
+                case 'High': 
+                    iconColor = 'red';
+                    break;
+                case 'Medium': 
+                    iconColor = 'blue';
+                    break;
+                case 'Low': 
+                    iconColor = 'green';
+                    break;
+            }
+        }
+
+        return iconColor;
+    }
+
+    constructList(list) {
+        return (
+            list.map((item) => {
+                return (
+                    <li><i className="fa fa-clock-o" style={{color : this.getIconColor(item.Priority)}}></i> {item.Name}</li>
+                )
+            }) 
+        )
+    }
+
+    showPopOver(priority) {
+        let list;
+        
+        if(priority != ''){
+            let priorityId = _.find(TaskStore.getPrioritiesEnum(), { 'Name' : priority }).Id;   
+            list = this.constructList(_.filter(this.state.tList,{ 'Priority' :  priorityId }));          
+        }
+        else{
+            list = this.constructList(this.state.tList);
+        }       
 
         return (
             <Popover id="popover-trigger-hover-focus" title={`${priority} Priority Tasks`}>
-                <ul className="list-unstyled">
-                    {_.filter(this.state.tList,{ 'Priority' :  priorityId }).map((item) => {
-                        return (
-                            <li>{item.Name}</li>
-                        )
-                    })}
+                <ul className="list-unstyled">                    
+                    { list }             
                 </ul>
             </Popover>
         )
@@ -55,6 +93,9 @@ class PriorityPopOverMenu extends React.Component{
                 <OverlayTrigger trigger="focus" placement="left" overlay={this.showPopOver('Low')}>
                     <MenuItem eventKey={1.3}>Low</MenuItem>
                 </OverlayTrigger>
+                <OverlayTrigger trigger="focus" placement="left" overlay={this.showPopOver('')}>
+                    <MenuItem eventKey={1.4}>All</MenuItem>
+                </OverlayTrigger>                 
             </NavDropdown> 
         );
     }
