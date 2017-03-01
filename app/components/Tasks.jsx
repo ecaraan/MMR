@@ -2,6 +2,7 @@ import React from 'react';
 import _  from 'lodash';
 import { Modal } from 'react-bootstrap';
 import Pagination from './Pagination.jsx';
+import TaskForm from './TaskForm.jsx';
 import TaskStore from '../stores/TaskStore';
 import TaskPageStore from '../stores/TaskPageStore';
 import * as TaskAction from '../actions/TaskAction';
@@ -30,9 +31,9 @@ class Tasks extends React.Component{
         this.closeConfirmModal = this.closeConfirmModal.bind(this);
         this.openModal = this.openModal.bind(this);
 
-        this.handleAddTask = this.handleAddTask.bind(this);
         this.handleUpdateTask = this.handleUpdateTask.bind(this);
         this.handleRemoveTask = this.handleRemoveTask.bind(this);
+        this.handlePostAddAction = this.handlePostAddAction.bind(this);
 
         this.confirmRemove = this.confirmRemove.bind(this);
         
@@ -79,7 +80,7 @@ class Tasks extends React.Component{
 
     }
 
-    closeModal() {
+    closeModal() {        
         this.setState({ showModal: false });
     }
 
@@ -95,20 +96,11 @@ class Tasks extends React.Component{
         return Math.ceil(totalRows / rowsPerPage);
     }
 
-    handleAddTask(){
-        TaskAction.addTask({
-            name : this.refs['modal_taskName'].value,
-            description : this.refs['modal_taskDescription'].value,
-            priority : parseInt(this.refs['modal_taskPriority'].value),
-            status : parseInt(this.refs['modal_taskStatus'].value)
-        });
-        
-       PageAction.goToLastPage();
-
-       this.setState({ showModal: false});
-
-    }
-
+    handlePostAddAction(){
+        this.closeModal();
+        PageAction.goToLastPage();        
+    }    
+    
     handleUpdateTask(){
         let id = this.state.itemToEditId;
 
@@ -262,37 +254,8 @@ class Tasks extends React.Component{
                             <Modal.Title>Add New Task</Modal.Title>
                         </Modal.Header>
                         <Modal.Body>
-                            <form>
-                                <div className="form-group">
-                                    <input ref="modal_taskName" className="form-control" placeholder="Enter Task Name" />  
-                                </div>   
-                                <div className="form-group">                           
-                                    <textarea ref="modal_taskDescription" className="form-control" placeholder="Enter Task Description" />                                    
-                                </div>
-                                <div className="form-group"> 
-                                    <select placeholder="select" ref="modal_taskPriority" className="form-control">
-                                        <option value="0" disabled selected hidden>Priority</option>
-                                        <option value="1">Low</option>
-                                        <option value="2">Medium</option>
-                                        <option value="3">High</option>
-                                    </select> 
-                                </div>
-                                <div className="form-group"> 
-                                    <select placeholder="select" ref="modal_taskStatus" className="form-control">
-                                        <option value="" disabled selected hidden>Status</option>
-                                        <option value="1">To Do</option>
-                                        <option value="2">In Progress</option>
-                                        <option value="3">Done</option>
-                                    </select> 
-                                </div>                                  
-                            </form>
+                            <TaskForm postAddAction={this.handlePostAddAction} closeForm={this.closeModal} />
                         </Modal.Body>
-                        <Modal.Footer>
-                            <div className="modal-action-buttons">
-                                <button onClick={this.handleAddTask} className="btn btn-primary">Add</button>
-                                <button onClick={this.closeModal} className="btn btn-secondary">Cancel</button>
-                            </div>
-                        </Modal.Footer>
                     </Modal>
                     <Modal show={this.state.showConfirmModal} onHide={this.closeConfirmModal}>
                         <Modal.Header closeButton>
