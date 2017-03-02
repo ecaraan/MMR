@@ -9,6 +9,7 @@ import React from 'react';
 import MainLayout from './components/MainLayout.jsx';
 import Home from './components/Home.jsx';
 import Tasks from './components/Tasks.jsx';
+import TimerConfigs from './components/TimerConfigs.jsx';
 import About from './components/About.jsx';
 
 ReactDOM.render((
@@ -16,6 +17,7 @@ ReactDOM.render((
     <Route path="/" component={MainLayout}>
       <IndexRoute component={Home} />
       <Route path="/tasks" component={Tasks} />
+      <Route path="/timer" component={TimerConfigs} />
       <Route path="/about" component={About} />
     </Route>
   </Router>

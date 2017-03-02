@@ -93,7 +93,7 @@ class TaskForm extends React.Component{
 };
 
 TaskForm.propTypes = {
-    addTask: React.PropTypes.func.isRequired,
+    postAddAction: React.PropTypes.func.isRequired,
     closeForm: React.PropTypes.func.isRequired
 }
 
