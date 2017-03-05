@@ -34,7 +34,7 @@ class TimerConfigForm extends React.Component{
     }
 
     handleChangeIsDefault(e) {
-        this.setState({ isDefault: e.target.value })
+        this.setState({ isDefault: e.target.checked })
     }
 
     handleSetToDefault() {
@@ -63,25 +63,25 @@ class TimerConfigForm extends React.Component{
                         value={this.state.name}
                         onChange={this.handleChangeName.bind(this)} />  
                 </div>   
-                <div className="form-group">                           
-                    <input className="form-control" 
-                        placeholder="Pomodoro (in minutes)" 
+                <div className="form-group">      
+                    <label>Pomodoro<small>  (In Minutes)</small></label>                     
+                    <input className="form-control"
                         value={this.state.pomodoro}
                         onChange={this.handleChangePomodoro.bind(this)}/>                                    
                 </div>
-                <div className="form-group">                           
-                    <input className="form-control" 
-                        placeholder="Short Break (in minutes)" 
+                <div className="form-group">        
+                    <label>Short Break<small>  (In Minutes)</small></label>                   
+                    <input className="form-control"
                         value={this.state.shortBreak}
                         onChange={this.handleChangeShortBreak.bind(this)}/>                                    
                 </div>
                 <div className="form-group">                           
-                    <input className="form-control" 
-                        placeholder="Long Break (in minutes)" 
+                    <label>Long Break<small>  (In Minutes)</small></label>
+                    <input className="form-control"
                         value={this.state.longBreak}
                         onChange={this.handleChangeLongBreak.bind(this)}/>                                    
                 </div>
-                <div class="form-group checkbox">
+                <div className="form-group checkbox">
                     <label>
                         <input type="checkbox" 
                             value={this.state.isDefault}

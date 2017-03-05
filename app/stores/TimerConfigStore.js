@@ -10,17 +10,18 @@ class TimerConfigStore extends EventEmitter {
         super();
 
         this._state = {
-            timerCongfigs: typeof localStorage[timerConfigLocalStorageName] == 'undefined' ? [] : 
+            timerConfigs: typeof localStorage[timerConfigLocalStorageName] == 'undefined' ? [] : 
                     JSON.parse(localStorage.getItem(timerConfigLocalStorageName) || [])
         }
     }
 
     getTimerConfigs() {
-        return this._state.timerCongfigs;
+        return  _.orderBy(this._state.timerConfigs, ['isDefault'], ['asc']);
+        //return this._state.timerConfigs;
     }
 
     persistToStorage() {
-        localStorage.setItem(timerConfigLocalStorageName, JSON.stringify(this._state.timerCongfigs));
+        localStorage.setItem(timerConfigLocalStorageName, JSON.stringify(this._state.timerConfigs));
     }
 
     removePreviousDefault() {
@@ -32,12 +33,12 @@ class TimerConfigStore extends EventEmitter {
 
     addTimerConfig(config) {
         
-        let id = _.max(_.map(this._state.timerCongfigs, 'Id'));
+        let id = _.max(_.map(this._state.timerConfigs, 'id'));
                 
         if (config.isDefault)
             this.removePreviousDefault();
 
-        this._state.timerCongfigs.push({
+        this._state.timerConfigs.push({
             id : (id || 0) + 1, 
             name : config.name,
             pomodoro : config.pomodoro,
@@ -51,7 +52,7 @@ class TimerConfigStore extends EventEmitter {
 
     deleteTimerConfig(id) {
 
-        _.remove(this._state.timerCongfigs, ['Id', id]);
+        _.remove(this._state.timerConfigs, ['id', id]);
 
         this.persistToStorage();
 
@@ -59,7 +60,7 @@ class TimerConfigStore extends EventEmitter {
 
     updateTimerConfig(config){
                
-        let itemToUpdate = _.find(this._state.timerConfigs, ['Id', config.id]);
+        let itemToUpdate = _.find(this._state.timerConfigs, ['id', config.id]);
 
         if (config.isDefault)
             this.removePreviousDefault();

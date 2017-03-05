@@ -131,11 +131,11 @@ class TimerConfigs extends React.Component{
 
     displayOrEdit(item){
     
-        if ( this.state.itemToEditId === item.Id ) {
-             return  <tr key={item.Id}>
+        if ( this.state.itemToEditId === item.id ) {
+             return  <tr key={item.id}>
                         <td>
                              <input type="checkbox" 
-                                value={this.state.itemToEditIsDefault}
+                                checked={this.state.itemToEditIsDefault}
                                 onChange={this.handleChangeIsDefault.bind(this)}/>
                         </td>
                         <td>
@@ -173,8 +173,8 @@ class TimerConfigs extends React.Component{
                     </tr>;
         } 
         else {
-            return  <tr key={item.Id}>
-                        <td>{item.isDefault}</td>
+            return  <tr key={item.id}>
+                        <td>{item.isDefault ? 'true' : 'false'}</td>
                         <td>{item.name}</td>
                         <td>{item.pomodoro}</td>
                         <td>{item.shortBreak}</td>
@@ -182,10 +182,10 @@ class TimerConfigs extends React.Component{
                         <td>
                             <div className="btn-toolbar" role="toolbar">
                                 <div className="btn-group" role="group">
-                                    <button className="btn btn-primary" onClick={() => this.toggleEditing(item.Id)}>
+                                    <button className="btn btn-primary" onClick={() => this.toggleEditing(item.id)}>
                                         <span className="glyphicon glyphicon-edit"></span>
                                     </button>
-                                    <button className="btn btn-danger" onClick={() => this.confirmRemove(item.Id)}>
+                                    <button className="btn btn-danger" onClick={() => this.confirmRemove(item.id)}>
                                         <span className="glyphicon glyphicon-trash"></span>
                                     </button>
                                 </div>
