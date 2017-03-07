@@ -1,5 +1,6 @@
 import React from 'react';
 import * as TaskAction from '../actions/TaskAction';
+import TimerConfigStore from '../stores/TimerConfigStore';
 
 class TaskForm extends React.Component{
     constructor(props) {
@@ -12,7 +13,8 @@ class TaskForm extends React.Component{
             name: '',
             description: '',
             priority: '0',
-            status: '0'
+            status: '0',
+            timer: '0'
         }
     }
     
@@ -32,12 +34,17 @@ class TaskForm extends React.Component{
         this.setState({ status: e.target.value })
     }
 
+    handleChangeTimer(e) {
+        this.setState({ timer: e.target.value })
+    }
+
     handleAddTask(){
         TaskAction.addTask({
             name : this.state.name,
             description : this.state.description,
             priority : parseInt(this.state.priority),
-            status : parseInt(this.state.status)
+            status : parseInt(this.state.status),
+            timer: parseInt(this.state.timer)
         });
         
         this.props.postAddAction();
@@ -64,7 +71,7 @@ class TaskForm extends React.Component{
                         className="form-control"
                         value={this.state.priority}
                         onChange={this.handleChangePriority.bind(this)}>
-                        <option value="0" disabled selected hidden>Priority</option>
+                        <option value="0" disabled hidden>Priority</option>
                         <option value="1">Low</option>
                         <option value="2">Medium</option>
                         <option value="3">High</option>
@@ -75,10 +82,25 @@ class TaskForm extends React.Component{
                         className="form-control"
                         value={this.state.status}
                         onChange={this.handleChangeStatus.bind(this)}>
-                        <option value="0" disabled selected hidden>Status</option>
+                        <option value="0" disabled hidden>Status</option>
                         <option value="1">To Do</option>
                         <option value="2">In Progress</option>
                         <option value="3">Done</option>
+                    </select> 
+                </div>
+                <div className="form-group"> 
+                    <select placeholder="select" 
+                        className="form-control"
+                        value={this.state.timer}
+                        onChange={this.handleChangeTimer.bind(this)}>
+                        <option value="0" disabled hidden>Timer</option>
+                        {
+                            TimerConfigStore.getTimerConfigs().map((item) => {
+                                return (
+                                    <option value={item.id}>{item.name}</option>
+                                )
+                            })
+                        }    
                     </select> 
                 </div>
                 <hr/>

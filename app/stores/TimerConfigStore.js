@@ -16,8 +16,7 @@ class TimerConfigStore extends EventEmitter {
     }
 
     getTimerConfigs() {
-        return  _.orderBy(this._state.timerConfigs, ['isDefault'], ['asc']);
-        //return this._state.timerConfigs;
+        return  _.orderBy(this._state.timerConfigs, ['isDefault'], ['desc']);
     }
 
     persistToStorage() {
@@ -25,10 +24,11 @@ class TimerConfigStore extends EventEmitter {
     }
 
     removePreviousDefault() {
-        let itemToUpdate = _.find(this._state.timerConfigs, ['isDefault', true]);
+        let itemsToUpdate = _.filter(this._state.timerConfigs, ['isDefault', true]);
 
-        if (itemToUpdate)
-            itemToUpdate.isDefault = false;
+        itemsToUpdate.map((item) => {
+            item.isDefault = false;
+        })            
     }
 
     addTimerConfig(config) {

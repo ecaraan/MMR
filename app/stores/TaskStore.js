@@ -46,7 +46,8 @@ class TaskStore extends EventEmitter {
             Name : task.name,
             Description : task.description,
             Priority : task.priority,
-            Status : task.status
+            Status : task.status,
+            Timer: task.timer
         });
 
         this.persistToStorage();
@@ -67,7 +68,8 @@ class TaskStore extends EventEmitter {
         itemToUpdate.Name = task.name,
         itemToUpdate.Description = task.description,
         itemToUpdate.Priority = task.priority,
-        itemToUpdate.Status = task.status
+        itemToUpdate.Status = task.status,
+        itemToUpdate.Timer = task.timer
 
         this.persistToStorage();
     }

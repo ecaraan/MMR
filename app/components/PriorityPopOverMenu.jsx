@@ -55,7 +55,7 @@ class PriorityPopOverMenu extends React.Component{
         return (
             list.map((item) => {
                 return (
-                    <li><i className="fa fa-clock-o" style={{color : this.getIconColor(item.Priority)}}></i> {item.Name}</li>
+                    <li key={item.Id}><i className="fa fa-clock-o" style={{color : this.getIconColor(item.Priority)}}></i> {item.Name}</li>
                 )
             }) 
         )

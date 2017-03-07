@@ -55,7 +55,7 @@ class TimerConfigs extends React.Component{
     }
 
     handleChangeIsDefault(e) {
-        this.setState({ itemToEditIsDefault: e.target.value })
+        this.setState({ itemToEditIsDefault: e.target.checked })
     }
     
     setItemsFromStore() {
@@ -133,10 +133,10 @@ class TimerConfigs extends React.Component{
     
         if ( this.state.itemToEditId === item.id ) {
              return  <tr key={item.id}>
-                        <td>
+                        <td> &nbsp;&nbsp;&nbsp;
                              <input type="checkbox" 
                                 checked={this.state.itemToEditIsDefault}
-                                onChange={this.handleChangeIsDefault.bind(this)}/>
+                                onChange={this.handleChangeIsDefault.bind(this)} />
                         </td>
                         <td>
                             <input className="form-control" 
@@ -173,8 +173,8 @@ class TimerConfigs extends React.Component{
                     </tr>;
         } 
         else {
-            return  <tr key={item.id}>
-                        <td>{item.isDefault ? 'true' : 'false'}</td>
+            return  <tr key={item.id} className={ item.isDefault ? 'success' : ''}>
+                        <td>{item.isDefault ? <div>&nbsp;&nbsp;&nbsp;<span className="glyphicon glyphicon-ok"></span></div> : '' }</td>
                         <td>{item.name}</td>
                         <td>{item.pomodoro}</td>
                         <td>{item.shortBreak}</td>
@@ -217,7 +217,8 @@ class TimerConfigs extends React.Component{
                                 <th>Name</th>
                                 <th>Pomodoro</th>                                
                                 <th>Short Break</th>
-                                <th>Long Break</th> 
+                                <th>Long Break</th>
+                                <th></th>
                             </tr>
                         </thead>
                         <tbody>

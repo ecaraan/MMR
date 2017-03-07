@@ -5,6 +5,7 @@ import Pagination from './Pagination.jsx';
 import TaskForm from './TaskForm.jsx';
 import TaskStore from '../stores/TaskStore';
 import TaskPageStore from '../stores/TaskPageStore';
+import TimerConfigStore from '../stores/TimerConfigStore';
 import * as TaskAction from '../actions/TaskAction';
 import * as PageAction from '../actions/PageAction';
 
@@ -109,7 +110,8 @@ class Tasks extends React.Component{
             name: this.refs['editName_' + id].value,
             description : this.refs['editDescription_' + id].value,
             priority : parseInt(this.refs['editPriority_' + id].value),
-            status : parseInt(this.refs['editStatus_' + id].value)
+            status : parseInt(this.refs['editStatus_' + id].value),
+            timer : parseInt(this.refs['editTimer_' + id].value),
         })
 
         this.setState({ itemToEditId: null });        
@@ -143,6 +145,7 @@ class Tasks extends React.Component{
 
         let p = _.find(TaskStore.getPrioritiesEnum(), ['Id', item.Priority]);
         let s = _.find(TaskStore.getStatusEnum(), ['Id', item.Status]);
+        let t = _.find(TimerConfigStore.getTimerConfigs(), ['id', item.Timer]);
 
         if ( this.state.itemToEditId === item.Id ) {
              return  <tr key={item.Id}>
@@ -167,6 +170,18 @@ class Tasks extends React.Component{
                             </select>
                         </td>
                         <td>
+                            <select ref={`editTimer_${item.Id}`} defaultValue={item.Timer || "0"} className="form-control">
+                                <option value="0" disabled hidden>Timer</option>
+                                {
+                                    TimerConfigStore.getTimerConfigs().map((item) => {
+                                        return (
+                                            <option value={item.id}>{item.name}</option>
+                                        )
+                                    })
+                                }                          
+                            </select>
+                        </td>
+                        <td>
                             <div className="btn-toolbar" role="toolbar">
                                 <div className="btn-group" role="group">
                                     <button className="btn btn-success" onClick={this.handleUpdateTask}>
@@ -188,6 +203,7 @@ class Tasks extends React.Component{
                         </td>
                         <td>{p ? p.Name : ''}</td>
                         <td>{s ? s.Name : ''}</td>
+                        <td>{t ? t.name : ''}</td>
                         <td>
                             <div className="btn-toolbar" role="toolbar">
                                 <div className="btn-group" role="group">
@@ -234,6 +250,7 @@ class Tasks extends React.Component{
                                     <a href="#" onClick={() => this.sortTable('Status')}>Status </a>
                                     <i className={`fa ${this.state.sortColumn == 'Status' ? 'fa-sort-' + this.state.sortOrder : 'fa-sort'}`}></i>
                                 </th>
+                                <th>Timer</th>
                                 <th></th>
                             </tr>
                         </thead>

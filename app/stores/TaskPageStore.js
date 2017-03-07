@@ -3,7 +3,7 @@ import Dispatcher from '../dispatcher';
 import PageActionTypes from '../constants/PageActionTypes';
 import TaskStore from './TaskStore';
 
-const initialCurrentPage = 1, initialRowsPerPage = 2;
+const initialCurrentPage = 1, initialRowsPerPage = 5;
 
 class TaskPageStore extends EventEmitter {   
 

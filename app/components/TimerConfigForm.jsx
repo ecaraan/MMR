@@ -1,5 +1,6 @@
 import React from 'react';
 import * as TimerConfigAction from '../actions/TimerConfigAction';
+import * as InputFilter from '../utils/InputValidation';
 
 class TimerConfigForm extends React.Component{
     constructor(props) {
@@ -53,6 +54,10 @@ class TimerConfigForm extends React.Component{
         this.props.postAddAction();
     }
 
+    handleFocus(e) {
+       e.target.select();
+    }
+
     render() {
 
         return (
@@ -67,19 +72,25 @@ class TimerConfigForm extends React.Component{
                     <label>Pomodoro<small>  (In Minutes)</small></label>                     
                     <input className="form-control"
                         value={this.state.pomodoro}
-                        onChange={this.handleChangePomodoro.bind(this)}/>                                    
+                        onChange={this.handleChangePomodoro.bind(this)}
+                        onKeyPress={(e) => InputFilter.numeric(e)}
+                        onFocus={(e) =>this.handleFocus(e)}/>                     
                 </div>
                 <div className="form-group">        
                     <label>Short Break<small>  (In Minutes)</small></label>                   
                     <input className="form-control"
                         value={this.state.shortBreak}
-                        onChange={this.handleChangeShortBreak.bind(this)}/>                                    
+                        onChange={this.handleChangeShortBreak.bind(this)}
+                        onKeyPress={(e) => InputFilter.numeric(e)}
+                        onFocus={(e) =>this.handleFocus(e)}/>                                    
                 </div>
                 <div className="form-group">                           
                     <label>Long Break<small>  (In Minutes)</small></label>
                     <input className="form-control"
                         value={this.state.longBreak}
-                        onChange={this.handleChangeLongBreak.bind(this)}/>                                    
+                        onChange={this.handleChangeLongBreak.bind(this)}
+                        onKeyPress={(e) => InputFilter.numeric(e)}
+                        onFocus={(e) =>this.handleFocus(e)}/>                                    
                 </div>
                 <div className="form-group checkbox">
                     <label>
