@@ -19,6 +19,10 @@ class TimerConfigStore extends EventEmitter {
         return  _.orderBy(this._state.timerConfigs, ['isDefault'], ['desc']);
     }
 
+    getDefaultTimerConfig() {
+        return _.find(this._state.timerConfigs, ['isDefault', true])
+    }
+
     persistToStorage() {
         localStorage.setItem(timerConfigLocalStorageName, JSON.stringify(this._state.timerConfigs));
     }

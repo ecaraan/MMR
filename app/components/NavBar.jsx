@@ -13,10 +13,11 @@ class NavBar extends React.Component{
                             <NavLink to="/tasks">Tasks</NavLink>
                             <NavLink to="/timer">Timer</NavLink>
                             <NavLink to="/dashboard">Dashboard</NavLink>
+                            <NavLink to="/about">About</NavLink> 
                         </ul>                        
                         <ul className="nav navbar-nav navbar-right">                            
-                             <PriorityPopOverMenu />
-                             <NavLink to="/about">About</NavLink>  
+                            <PriorityPopOverMenu />
+                            <NavLink to="/about">Add Task</NavLink> 
                         </ul>
                     </div>
                 </div>

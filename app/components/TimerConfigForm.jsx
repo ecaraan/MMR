@@ -1,6 +1,7 @@
 import React from 'react';
 import * as TimerConfigAction from '../actions/TimerConfigAction';
 import * as InputFilter from '../utils/InputValidation';
+import TimerConfigStore from '../stores/TimerConfigStore';
 
 class TimerConfigForm extends React.Component{
     constructor(props) {
@@ -39,6 +40,15 @@ class TimerConfigForm extends React.Component{
     }
 
     handleSetToDefault() {
+        let defaultTimerConfig = TimerConfigStore.getDefaultTimerConfig();
+
+        if (defaultTimerConfig){
+            this.setState ({
+                pomodoro: defaultTimerConfig.pomodoro,
+                shortBreak: defaultTimerConfig.shortBreak,
+                longBreak: defaultTimerConfig.longBreak,
+            });
+        }
 
     }
 

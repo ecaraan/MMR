@@ -57,6 +57,10 @@ class TimerConfigs extends React.Component{
     handleChangeIsDefault(e) {
         this.setState({ itemToEditIsDefault: e.target.checked })
     }
+
+    handleFocus(e) {
+       e.target.select();
+    }
     
     setItemsFromStore() {
         this.setState({ tList: TimerConfigStore.getTimerConfigs() });
@@ -105,7 +109,7 @@ class TimerConfigs extends React.Component{
         TimerConfigAction.deleteTimerConfig(this.state.itemToRemoveId);
         this.setState({ showConfirmModal: false});
     }
-
+   
     confirmRemove(id){
         let itemToRemove = _.find(this.state.tList, ['id', id]);
         this.setState({ showConfirmModal: true, itemToRemoveId: id, itemToRemoveName: itemToRemove.name});
@@ -146,17 +150,20 @@ class TimerConfigs extends React.Component{
                         <td>
                             <input className="form-control" 
                                 value={this.state.itemToEditPomodoro} 
-                                onChange={this.handleChangePomodoro.bind(this)}/>                            
+                                onChange={this.handleChangePomodoro.bind(this)}
+                                onFocus={(e) => this.handleFocus(e)}/>                            
                         </td>
                         <td>
                             <input className="form-control" 
                                 value={this.state.itemToEditShortBreak} 
-                                onChange={this.handleChangeShortBreak.bind(this)}/>                            
+                                onChange={this.handleChangeShortBreak.bind(this)}
+                                onFocus={(e) => this.handleFocus(e)}/>                            
                         </td>
                         <td>
                             <input className="form-control" 
                                 value={this.state.itemToEditLongBreak} 
-                                onChange={this.handleChangeLongBreak.bind(this)}/>                            
+                                onChange={this.handleChangeLongBreak.bind(this)}
+                                onFocus={(e) => this.handleFocus(e)}/>                            
                         </td>                        
                         <td>
                             <div className="btn-toolbar" role="toolbar">

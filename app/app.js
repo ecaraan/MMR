@@ -11,6 +11,7 @@ import Home from './components/Home.jsx';
 import Tasks from './components/Tasks.jsx';
 import TimerConfigs from './components/TimerConfigs.jsx';
 import About from './components/About.jsx';
+import Dashboard from './components/Dashboard.jsx';
 
 ReactDOM.render((
   <Router history={browserHistory}>
@@ -18,6 +19,7 @@ ReactDOM.render((
       <IndexRoute component={Home} />
       <Route path="/tasks" component={Tasks} />
       <Route path="/timer" component={TimerConfigs} />
+      <Route path="/dashboard" component={Dashboard} />
       <Route path="/about" component={About} />
     </Route>
   </Router>
