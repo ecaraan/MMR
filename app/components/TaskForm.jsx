@@ -9,12 +9,16 @@ class TaskForm extends React.Component{
     }
 
     getInitialState() {
+        let defaultTimerConfig = TimerConfigStore.getDefaultTimerConfig();
+        let dTimer = defaultTimerConfig ? defaultTimerConfig.id : '0';
+    
+
         return {
             name: '',
             description: '',
             priority: '0',
             status: '0',
-            timer: '0'
+            timer: dTimer
         }
     }
     
