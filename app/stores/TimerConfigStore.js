@@ -15,6 +15,10 @@ class TimerConfigStore extends EventEmitter {
         }
     }
 
+    getTimerConfig(id){
+        return _.find(this._state.timerConfigs, ['id', id]);
+    }
+
     getTimerConfigs() {
         return  _.orderBy(this._state.timerConfigs, ['isDefault'], ['desc']);
     }

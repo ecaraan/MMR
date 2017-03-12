@@ -21,6 +21,10 @@ class TaskStore extends EventEmitter {
         }
     }
 
+    getTask(id){
+        return _.find(this._state.tasks, ['Id', id]);
+    }
+
     getTasks() {
         return this._state.tasks;
     }
