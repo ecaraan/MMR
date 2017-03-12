@@ -25,6 +25,12 @@ class TaskStore extends EventEmitter {
         return this._state.tasks;
     }
 
+    getUncompletedTasks() {
+        return _.filter(this._state.tasks, function(item) {
+            return item.Status < 3;
+        });
+    }
+
     getPrioritiesEnum() {
         return this._state.priorityEnum;
     }

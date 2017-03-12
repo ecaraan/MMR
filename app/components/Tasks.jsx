@@ -4,10 +4,8 @@ import { Modal } from 'react-bootstrap';
 import Pagination from './Pagination.jsx';
 import TaskForm from './TaskForm.jsx';
 import TaskStore from '../stores/TaskStore';
-import TaskPageStore from '../stores/TaskPageStore';
 import TimerConfigStore from '../stores/TimerConfigStore';
 import * as TaskAction from '../actions/TaskAction';
-import * as PageAction from '../actions/PageAction';
 
 class Tasks extends React.Component{
 
@@ -21,9 +19,9 @@ class Tasks extends React.Component{
             sortOrder: null,
             showModal: false,
             showConfirmModal: false,
-            currentPage: TaskPageStore.getCurrentPage(),
-            rowsPerPage: TaskPageStore.getRowsPerPage(),
-            tList : TaskStore.getTasks()
+            currentPage: this.getTasks().length > 0? 1 : 0,
+            rowsPerPage: 5,
+            tList : this.getTasks()
         }
 
         this.sortTable = this.sortTable.bind(this);
@@ -41,26 +39,38 @@ class Tasks extends React.Component{
         this.toggleEditing = this.toggleEditing.bind(this);
 
         this.setTasksFromStore = this.setTasksFromStore.bind(this);
-        this.setPagingFromStore = this.setPagingFromStore.bind(this);
+        this.getTasks = this.getTasks.bind(this);
+        this.getValidPage = this.getValidPage.bind(this);
+
+        this.onPageChanged = this.onPageChanged.bind(this);
+        this.onRowsPerPageChanged = this.onRowsPerPageChanged.bind(this);
+    }
+
+    onPageChanged(page){
+        this.setState({ currentPage: page });
+    }
+
+    onRowsPerPageChanged(rowsPerPage){
+        this.setState({ rowsPerPage: rowsPerPage });   
+    }
+
+    getTasks(){
+        if (this.props.uncompletedOnly)
+            return TaskStore.getUncompletedTasks();
+        else
+            return TaskStore.getTasks();
     }
     
     setTasksFromStore() {
-        this.setState({ tList: TaskStore.getTasks() });
-    }
-
-    setPagingFromStore(){
-        this.setState({rowsPerPage: TaskPageStore.getRowsPerPage(), 
-            currentPage: TaskPageStore.getCurrentPage()});
+        this.setState({ tList: this.getTasks() });
     }
 
     componentWillMount() {
         TaskStore.on('change', this.setTasksFromStore);
-        TaskPageStore.on('change', this.setPagingFromStore);
     }
 
     componentWillUnmount() {
         TaskStore.removeListener('change', this.setTasksFromStore);
-        TaskPageStore.removeListener('change', this.setPagingFromStore);
     }
     
     sortTable(column){
@@ -93,13 +103,35 @@ class Tasks extends React.Component{
         this.setState({ showModal: true });
     }
 
-    getLastPage(totalRows, rowsPerPage) {
-        return Math.ceil(totalRows / rowsPerPage);
+    getLastPage() {
+        return Math.ceil(this.getTasks().length / this.state.rowsPerPage);
+    }
+
+    getValidPage(currentPage) {        
+        let lastPage = this.getLastPage()
+
+        if (lastPage > 0)
+        {
+            let isCurrentPageValid = currentPage <= lastPage;
+
+            if (isCurrentPageValid){
+                return currentPage;
+            }
+            else {
+                if (currentPage > 1)
+                    this.getValidPage(currentPage - 1);
+                else
+                    return 1;
+            
+            }
+        }
+        else
+            return 0;
     }
 
     handlePostAddAction(){
         this.closeModal();
-        PageAction.goToLastPage();        
+        this.setState( { currentPage: this.getLastPage() });
     }    
     
     handleUpdateTask(){
@@ -119,17 +151,8 @@ class Tasks extends React.Component{
 
     handleRemoveTask(){
         TaskAction.deleteTask(this.state.taskToRemoveId);
-
-        //check if currentPage is valid
-        let isCurrentPageValid = this.state.currentPage <= this.getLastPage(TaskStore.getTasks().length, this.state.rowsPerPage);
-
-        if (isCurrentPageValid){
-            this.setState({ showConfirmModal: false});
-        }
-        else{
-            PageAction.goToPage(this.state.currentPage - 1);
-            this.setState({ showConfirmModal: false});
-        }        
+      
+        this.setState({ currentPage: this.getValidPage(this.state.currentPage), showConfirmModal: false});
     }
 
     confirmRemove(id){
@@ -263,7 +286,11 @@ class Tasks extends React.Component{
                             <button className="btn btn-primary" onClick={this.openModal}>Add New</button>
                          </div>
                          <div className="col-md-3">
-                            <Pagination />
+                            <Pagination currentPage={this.state.currentPage}
+                                    totalRows={this.getTasks().length}
+                                    rowsPerPage={this.state.rowsPerPage}
+                                    onPageChanged={this.onPageChanged}
+                                    onRowsPerPageChanged={this.onRowsPerPageChanged}/>
                          </div>
                     </div>
                     <Modal show={this.state.showModal} onHide={this.closeModal}>
@@ -292,6 +319,10 @@ class Tasks extends React.Component{
             </div>            
         );
     }
+}
+
+Tasks.defaultProps = {
+    uncompletedOnly: false
 }
 
 export default Tasks;

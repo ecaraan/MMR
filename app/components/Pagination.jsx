@@ -1,43 +1,62 @@
 import React from 'react';
-import TaskPageStore from '../stores/TaskPageStore';
-import * as PageAction from '../actions/PageAction';
+import * as InputFilter from '../utils/InputValidation';
 
 class Pagination extends React.Component{
-    constructor() {
-        super();
+    constructor(props) {
+        super(props);
 
-        this.onPageChanged = this.onPageChanged.bind(this);
-        this.onRowsPerPageChanged = this.onRowsPerPageChanged.bind(this);
+        this.state = {
+            rowsPerPage: this.props.rowsPerPage
+        }
+    }
+
+    handleChangeRowsPerPage(e) {
+        this.setState({ rowsPerPage: e.target.value });
+    }
+
+    handleFocus(e) {
+       e.target.select();
     }
 
     onPageChanged(page){
-        PageAction.goToPage(page);
+        if (page >= 1 && page <= this.getTotalPages())
+            this.props.onPageChanged(page);  
     }
 
-    onRowsPerPageChanged(){
-        PageAction.setRowsPerPage(parseInt(this.refs['customRowsPerPage'].value));   
+    getTotalPages()
+    {
+        return Math.ceil(this.props.totalRows / this.props.rowsPerPage);
     }
 
     render(){
 
-        let lastPage = Math.ceil(this.props.totalRows / this.props.rowsPerPage)
-
         return <div>
             <div>
                 <ul className="pagination">
-                    <li><a href = "#" onClick={() => { PageAction.goToFirstPage() }}>&laquo;</a></li>
-                    <li><a href = "#" onClick={() => {if (TaskPageStore.getCurrentPage() > 1){this.onPageChanged(TaskPageStore.getCurrentPage() - 1)}}}>&lt;</a></li>               
-                    <li><a href = "#" onClick={() => {if (TaskPageStore.getCurrentPage() < TaskPageStore.getTotalPages()){this.onPageChanged(TaskPageStore.getCurrentPage() + 1)}}}>&gt;</a></li>
-                    <li><a href = "#" onClick={() => { PageAction.goToLastPage() }}>&raquo;</a></li>
-                    <li className="disabled"><span>Page {TaskPageStore.getCurrentPage()} of {TaskPageStore.getTotalPages()}</span></li>              
+                    <li><a href = "#" onClick={() => {this.onPageChanged(1)}}>&laquo;</a></li>
+                    <li><a href = "#" onClick={() => {this.onPageChanged(this.props.currentPage - 1)}}>&lt;</a></li>               
+                    <li><a href = "#" onClick={() => {this.onPageChanged(this.props.currentPage + 1)}}>&gt;</a></li>
+                    <li><a href = "#" onClick={() => {this.onPageChanged(this.getTotalPages())}}>&raquo;</a></li>
+                    <li className="disabled"><span>Page {this.props.currentPage} of {this.getTotalPages()}</span></li>              
                 </ul>        
             </div>
             <div>
-                <button className="btn btn-sm btn-primary" onClick={this.onRowsPerPageChanged}>Show</button>&nbsp;
-                <input ref="customRowsPerPage" style={{maxWidth: "40px"}} defaultValue={TaskPageStore.getRowsPerPage()} /> rows per page 
+                <button className="btn btn-sm btn-primary" onClick={() => {this.props.onRowsPerPageChanged(this.state.rowsPerPage)}}>Show</button>&nbsp;
+                <input ref="customRowsPerPage"
+                        style={{maxWidth: "40px"}} 
+                        value={this.state.rowsPerPage}
+                        onChange={this.handleChangeRowsPerPage.bind(this)}
+                        onKeyPress={(e) => InputFilter.numeric(e)}
+                        onFocus={(e) =>this.handleFocus(e)} /> rows per page 
             </div>
         </div>
     }
+}
+
+Pagination.defaultProps = {
+    totalRows : 0,
+    rowsPerPage: 0,
+    currentPage: 0
 }
 
 export default Pagination;
