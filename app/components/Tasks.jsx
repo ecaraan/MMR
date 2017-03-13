@@ -192,6 +192,7 @@ class Tasks extends React.Component{
                                 <option value="3">Done</option>                          
                             </select>
                         </td>
+                        <td></td>
                         <td>
                             <select ref={`editTimer_${item.Id}`} defaultValue={item.Timer || "0"} className="form-control">
                                 <option value="0" disabled hidden>Timer</option>
@@ -226,6 +227,7 @@ class Tasks extends React.Component{
                         </td>
                         <td>{p ? p.Name : ''}</td>
                         <td>{s ? s.Name : ''}</td>
+                        <td>{item.Duration}</td>
                         <td>{t ? t.name : ''}</td>
                         <td>
                             <div className="btn-toolbar" role="toolbar">
@@ -273,6 +275,7 @@ class Tasks extends React.Component{
                                     <a href="#" onClick={() => this.sortTable('Status')}>Status </a>
                                     <i className={`fa ${this.state.sortColumn == 'Status' ? 'fa-sort-' + this.state.sortOrder : 'fa-sort'}`}></i>
                                 </th>
+                                <th>Duration</th>
                                 <th>Timer</th>
                                 <th></th>
                             </tr>

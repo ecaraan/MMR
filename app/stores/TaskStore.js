@@ -57,7 +57,8 @@ class TaskStore extends EventEmitter {
             Description : task.description,
             Priority : task.priority,
             Status : task.status,
-            Timer: task.timer
+            Timer: task.timer,
+            Duration: 0 //in milli-seconds
         });
 
         this.persistToStorage();

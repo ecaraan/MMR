@@ -1,16 +1,19 @@
 import React from 'react';
 import TaskStore from '../stores/TaskStore';
 import TimerConfigStore from '../stores/TimerConfigStore';
+import TimerStatStore from '../stores/TimerStatStore';
 import * as TimerUtil from '../utils/TimerUtil';
 
 class Timer extends React.Component {
     constructor(){
         super();
 
+        let timerStat = TimerStatStore.getStat();
+
         this.state = {
-            taskId: 0,
+            taskId: timerStat.taskId,
             timer: null,
-            activeTimer: 'pomodoro',
+            activeTimer: timerStat.timerMode,
             pomodoroStartTime: 0,
             pomodoroEndTime: 0,
             shortBreakStartTime: 0,
@@ -19,10 +22,40 @@ class Timer extends React.Component {
             longBreakEndTime: 0,
             status: '' //notstarted, inprogress, completed
         }
+
+        this.handleTimerStatChange = this.handleTimerStatChange.bind(this);
+    }
+
+    handleTimerStatChange() {
+
+    }
+
+    componentWillMount() {
+        TimerStatStore.on('change', this.handleTimerStatChange);
+    }
+
+    componentWillUnmount() {
+        TimerStatStore.removeListener('change', this.handleTimerStatChange);
     }
 
     handleClickTimerType(timerType) {
         this.setState ({ activeTimer: timerType })
+    }
+
+    handleClickStart() {
+        alert('1');
+    }
+
+    handleClickStop() {
+        alert('2');
+    }
+
+    handleClickReset() {
+        alert('3');
+    }
+
+    handleClickComplete() {
+        alert('4');
     }
 
     handleChangeTask(e) {
@@ -76,13 +109,16 @@ class Timer extends React.Component {
                     </select>
                 </div>
                 <div className="btn-group" role="group">
-                    <button className={"btn btn-sm btn-success " + (this.state.activeTimer == 'pomodoro' ? 'active' : '')} onClick={this.handleClickTimerType.bind(this, 'pomodoro')}>
+                    <button className={"btn btn-sm btn-success " + (this.state.activeTimer == 'pomodoro' ? 'active' : '')} 
+                            onClick={this.handleClickTimerType.bind(this, 'pomodoro')}>
                         Pomodoro
                     </button>
-                    <button className="btn btn-sm btn-success" onClick={this.handleClickTimerType.bind(this, 'shortbreak')}>
+                    <button className="btn btn-sm btn-success" 
+                            onClick={this.handleClickTimerType.bind(this, 'shortbreak')}>
                         Short Break
                     </button>
-                    <button className="btn btn-sm btn-success" onClick={this.handleClickTimerType.bind(this, 'longbreak')}>
+                    <button className="btn btn-sm btn-success" 
+                            onClick={this.handleClickTimerType.bind(this, 'longbreak')}>
                         Long Break
                     </button>
                 </div>
@@ -90,16 +126,20 @@ class Timer extends React.Component {
                     {countDownTimerText}
                 </div>
                 <div>
-                    <button className="btn btn-sm btn-success btn-space">
+                    <button className="btn btn-sm btn-success btn-space"
+                        onClick={this.handleClickStart.bind(this)}>
                         Start
                     </button>
-                    <button className="btn btn-sm btn-danger btn-space">
+                    <button className="btn btn-sm btn-danger btn-space"
+                        onClick={this.handleClickStop.bind(this)}>
                         Stop
                     </button>
-                    <button className="btn btn-sm btn-warning btn-space">
+                    <button className="btn btn-sm btn-warning btn-space"
+                        onClick={this.handleClickReset.bind(this)}>
                         Reset
                     </button>
-                    <button className="btn btn-sm btn-primary">
+                    <button className="btn btn-sm btn-primary"
+                        onClick={this.handleClickComplete.bind(this)}>
                         Complete
                     </button>
                 </div>
