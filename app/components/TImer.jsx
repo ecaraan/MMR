@@ -5,6 +5,7 @@ import TimerStatStore from '../stores/TimerStatStore';
 import * as TimerStatAction from '../actions/TimerStatAction';
 import * as TaskAction from '../actions/TaskAction';
 import * as TimerUtil from '../utils/TimerUtil';
+import { Modal } from 'react-bootstrap';
 
 class Timer extends React.Component {
     constructor(){
@@ -14,6 +15,7 @@ class Timer extends React.Component {
         this.getCountDownTimerText = this.getCountDownTimerText.bind(this);
         this.updateDuration = this.updateDuration.bind(this);
         this.mapData = this.mapData.bind(this);
+        this.closeMessage = this.closeMessage.bind(this);
 
         let timerStat = TimerStatStore.getStat();
 
@@ -27,7 +29,9 @@ class Timer extends React.Component {
             shortBreakEndTime: 0,
             longBreakStartTime: 0,
             longBreakEndTime: 0,
-            countDownTimerText: this.getCountDownTimerText(timerStat.taskId, timerStat.timerMode)
+            countDownTimerText: this.getCountDownTimerText(timerStat.taskId, timerStat.timerMode),
+            message: '',
+            isMessageVisible : false
         }
 
         this.errorMessage = '';
@@ -52,22 +56,75 @@ class Timer extends React.Component {
     }
 
     handleClickStart() {
-        if (!this.startTimer(this.state.taskId, this.state.activeTimer))
-        {
-            alert(TimerManager.errorMessage);
+        if (this.state.taskId > 0){
+            if (!TimerStatStore.isRunning()){
+
+                let status = _.find(TaskStore.getStatusEnum(), ['Name', 'In Progress']);                 
+                let task = TaskStore.getTask(this.state.taskId);
+
+                task.Status = status.Id;
+                TaskAction.updateTask(this.mapData(task));
+
+                TimerStatAction.startTimer(this.state.taskId, this.state.activeTimer);
+
+                return true;
+            }
+            else {
+                let taskName = TaskStore.getTask(TimerStatStore.getActiveTaskId()).Name;
+                
+                this.setState({ message : `Timer is currently running for '${taskName}' in '${TimerStatStore.getTimerMode()}' mode.`,
+                                isMessageVisible: true });                
+            } 
+        }
+        else{
+             this.setState({ message : 'Please select a task to start.',
+                                isMessageVisible: true });
+        }
+
+        return false;
+    }
+
+    handleClickStop() {        
+        if(TimerStatStore.isRunning() &&
+            TimerStatStore.getActiveTaskId() == this.state.taskId &&
+            TimerStatStore.getTimerMode() == this.state.activeTimer){
+            
+            this.updateDuration(this.state.taskId, this.state.activeTimer);
+
+            TimerStatAction.stopTimer();
         }
     }
 
-    handleClickStop() {
-        this.stopTimer(this.state.taskId, this.state.activeTimer);
-    }
-
-    handleClickReset() {
-        this.resetTimer(this.state.taskId, this.state.activeTimer);
+    handleClickReset() {        
+        if(TimerStatStore.isRunning() &&
+            TimerStatStore.getActiveTaskId() == this.state.taskId &&
+            TimerStatStore.getTimerMode() ==  this.state.activeTimer){            
+            TimerStatAction.resetTimer();
+        }
     }
 
     handleClickComplete() {
-        this.completeTimer(this.state.taskId);
+       
+        //if there's an active timer and pertains to the task where Complete was triggered, 
+        //stop it first and add elapsed time to duration
+        if(TimerStatStore.isRunning() &&
+            TimerStatStore.getActiveTaskId() == this.state.taskId)
+        {
+            this.updateDuration(this.state.taskId, TimerStatStore.getTimerMode());
+        }
+        
+        //Set task's status to 'Done'
+        let task = TaskStore.getTask(this.state.taskId);
+
+        if (task != null)
+        {
+            let status = _.find(TaskStore.getStatusEnum(), ['Name', 'Done']);
+
+            task.Status = status.Id;
+            TaskAction.updateTask(this.mapData(task));
+
+            TimerStatAction.completeTimer(this.state.taskId);
+        }
     }
 
     handleChangeTask(e) {
@@ -85,6 +142,10 @@ class Timer extends React.Component {
                 }: null,
             countDownTimerText: this.getCountDownTimerText(selectedTaskId, 'pomodoro')
         });
+    }
+
+    closeMessage() {
+        this.setState ({ isMessageVisible: false });
     }
 
     getCountDownTimerText(taskId, timerMode){
@@ -124,71 +185,6 @@ class Timer extends React.Component {
             return '00:00:00';
     }
 
-    startTimer(taskId, timerMode){
-        if (taskId > 0){
-            if (!TimerStatStore.isRunning()){
-
-                let status = _.find(TaskStore.getStatusEnum(), ['Name', 'In Progress']);                 
-                let task = TaskStore.getTask(taskId);
-
-                task.Status = status.Id;
-                TaskAction.updateTask(this.mapData(task));
-
-                TimerStatAction.startTimer(taskId, timerMode);
-
-                return true;
-            }
-            else{
-                let taskName = TaskStore.getTask(TimerStatStore.activeTask()).Name;
-                this.errorMessage = `Timer is currently running for task,'${taskName}'.`;
-                return false;
-            } 
-        }
-    }
-
-    stopTimer(taskId, timerMode){
-        if(TimerStatStore.isRunning() &&
-            TimerStatStore.getActiveTaskId() == taskId &&
-            TimerStatStore.getTimerMode() == timerMode){
-            
-            this.updateDuration(taskId, timerMode);
-
-            TimerStatAction.stopTimer();
-        }
-    }
-
-    resetTimer(taskId, timerMode) {
-        if(TimerStatStore.isRunning() &&
-            TimerStatStore.getActiveTaskId() == taskId &&
-            TimerStatStore.getTimerMode() == timerMode){            
-            TimerStatAction.resetTimer();
-        }
-    }
-
-    completeTimer(taskId) {
-        
-        //if there's an active timer and pertains to the task where Complete was triggered, 
-        //stop it first and add elapsed time to duration
-        if(TimerStatStore.isRunning() &&
-            TimerStatStore.getActiveTaskId() == taskId)
-        {
-            this.updateDuration(taskId, TimerStatStore.getTimerMode());
-        }
-        
-        //Set task's status to 'Done'
-        let task = TaskStore.getTask(taskId);
-
-        if (task != null)
-        {
-            let status = _.find(TaskStore.getStatusEnum(), ['Name', 'Done']);
-
-            task.Status = status.Id;
-            TaskAction.updateTask(this.mapData(task));
-
-            TimerStatAction.completeTimer(taskId);
-        }
-    }
-
     updateDuration(taskId, timerMode){
         //update duration if mode is pomodoro or shortbreak
         if (timerMode == 'pomodoro' || timerMode == 'shortbreak'){
@@ -217,56 +213,71 @@ class Timer extends React.Component {
     render() {
 
         return (
-            <div className="timerbox">
-                <div>
-                    <select className="form-control" 
-                        value={this.state.taskId}
-                        onChange={this.handleChangeTask.bind(this)}>
-                        <option value="0" disabled hidden>Select a Task</option>
-                        {
-                            TaskStore.getUncompletedTasks().map((item) => {
-                                return (
-                                    <option value={item.Id}>{item.Name}</option>
-                                )
-                            })
-                        }
-                    </select>
-                </div>
-                <div className="btn-group" role="group">
-                    <button className={"btn btn-sm btn-success " + (this.state.activeTimer == 'pomodoro' ? 'active' : '')} 
-                            onClick={this.handleClickTimerType.bind(this, 'pomodoro')}>
-                        Pomodoro
-                    </button>
-                    <button className={"btn btn-sm btn-success " + (this.state.activeTimer == 'shortbreak' ? 'active' : '')}
-                            onClick={this.handleClickTimerType.bind(this, 'shortbreak')}>
-                        Short Break
-                    </button>
-                    <button className={"btn btn-sm btn-success " + (this.state.activeTimer == 'longbreak' ? 'active' : '')}
-                            onClick={this.handleClickTimerType.bind(this, 'longbreak')}>
-                        Long Break
-                    </button>
-                </div>
-                <div className="timertext">
-                    {this.state.countDownTimerText}
-                </div>
-                <div>
-                    <button className="btn btn-sm btn-success btn-space"
-                        onClick={this.handleClickStart.bind(this)}>
-                        Start
-                    </button>
-                    <button className="btn btn-sm btn-danger btn-space"
-                        onClick={this.handleClickStop.bind(this)}>
-                        Stop
-                    </button>
-                    <button className="btn btn-sm btn-warning btn-space"
-                        onClick={this.handleClickReset.bind(this)}>
-                        Reset
-                    </button>
-                    <button className="btn btn-sm btn-primary"
-                        onClick={this.handleClickComplete.bind(this)}>
-                        Complete
-                    </button>
-                </div>
+            <div>
+                <div className="timerbox">
+                    <div>
+                        <select className="form-control" 
+                            value={this.state.taskId}
+                            onChange={this.handleChangeTask.bind(this)}>
+                            <option value="0" disabled hidden>Select a Task</option>
+                            {
+                                TaskStore.getUncompletedTasks().map((item) => {
+                                    return (
+                                        <option value={item.Id}>{item.Name}</option>
+                                    )
+                                })
+                            }
+                        </select>
+                    </div>
+                    <div className="btn-group" role="group">
+                        <button className={"btn btn-sm btn-success " + (this.state.activeTimer == 'pomodoro' ? 'active' : '')} 
+                                onClick={this.handleClickTimerType.bind(this, 'pomodoro')}>
+                            Pomodoro
+                        </button>
+                        <button className={"btn btn-sm btn-success " + (this.state.activeTimer == 'shortbreak' ? 'active' : '')}
+                                onClick={this.handleClickTimerType.bind(this, 'shortbreak')}>
+                            Short Break
+                        </button>
+                        <button className={"btn btn-sm btn-success " + (this.state.activeTimer == 'longbreak' ? 'active' : '')}
+                                onClick={this.handleClickTimerType.bind(this, 'longbreak')}>
+                            Long Break
+                        </button>
+                    </div>
+                    <div className="timertext">
+                        {this.state.countDownTimerText}
+                    </div>
+                    <div>
+                        <button className="btn btn-sm btn-success btn-space"
+                            onClick={this.handleClickStart.bind(this)}>
+                            Start
+                        </button>
+                        <button className="btn btn-sm btn-danger btn-space"
+                            onClick={this.handleClickStop.bind(this)}>
+                            Stop
+                        </button>
+                        <button className="btn btn-sm btn-warning btn-space"
+                            onClick={this.handleClickReset.bind(this)}>
+                            Reset
+                        </button>
+                        <button className="btn btn-sm btn-primary"
+                            onClick={this.handleClickComplete.bind(this)}>
+                            Complete
+                        </button>
+                    </div>
+                </div>               
+                <Modal show={this.state.isMessageVisible} onHide={this.closeMessage}>
+                    <Modal.Header closeButton>
+                        <Modal.Title>Info</Modal.Title>
+                    </Modal.Header>
+                    <Modal.Body>
+                        <p className="">{this.state.message}</p>
+                    </Modal.Body>
+                    <Modal.Footer>
+                        <div className="modal-action-buttons">
+                            <button onClick={this.closeMessage} className="btn btn-primary">Ok</button>
+                        </div>
+                    </Modal.Footer>
+                </Modal>
             </div>
         )
     }
