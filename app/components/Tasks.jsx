@@ -6,6 +6,7 @@ import TaskForm from './TaskForm.jsx';
 import TaskStore from '../stores/TaskStore';
 import TimerConfigStore from '../stores/TimerConfigStore';
 import * as TaskAction from '../actions/TaskAction';
+import * as TimerUtil from '../utils/TimerUtil';
 
 class Tasks extends React.Component{
 
@@ -136,6 +137,7 @@ class Tasks extends React.Component{
     
     handleUpdateTask(){
         let id = this.state.itemToEditId;
+        let task = _.find(this.getTasks(), ['Id', id]);
 
         TaskAction.updateTask({
             id: id,
@@ -144,6 +146,7 @@ class Tasks extends React.Component{
             priority : parseInt(this.refs['editPriority_' + id].value),
             status : parseInt(this.refs['editStatus_' + id].value),
             timer : parseInt(this.refs['editTimer_' + id].value),
+            duration : task.Duration
         })
 
         this.setState({ itemToEditId: null });        
@@ -192,7 +195,7 @@ class Tasks extends React.Component{
                                 <option value="3">Done</option>                          
                             </select>
                         </td>
-                        <td></td>
+                        <td>{TimerUtil.MillisecodsToText2(item.Duration)}</td>
                         <td>
                             <select ref={`editTimer_${item.Id}`} defaultValue={item.Timer || "0"} className="form-control">
                                 <option value="0" disabled hidden>Timer</option>
@@ -227,7 +230,7 @@ class Tasks extends React.Component{
                         </td>
                         <td>{p ? p.Name : ''}</td>
                         <td>{s ? s.Name : ''}</td>
-                        <td>{item.Duration}</td>
+                        <td>{TimerUtil.MillisecodsToText2(item.Duration)}</td>
                         <td>{t ? t.name : ''}</td>
                         <td>
                             <div className="btn-toolbar" role="toolbar">

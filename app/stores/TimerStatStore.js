@@ -29,15 +29,15 @@ class TimerStatStore extends EventEmitter {
         return this._state.timerStat.isRunning;
     }
 
-    activeTaskId() {
+    getActiveTaskId() {
         return this._state.timerStat.taskId;
     }
 
-    startTime() {
+    getStartTime() {
         return this._state.timerStat.startTime;
     }
 
-    timerMode() {
+    getTimerMode() {
         return this._state.timerStat.timerMode;
     }
     
@@ -46,7 +46,23 @@ class TimerStatStore extends EventEmitter {
     }
 
     getElapsedTime() {
-        return ((new Date()).getTime() - this._state.timerStat.startTime.getTime());
+        return ((new Date()).getTime() - (new Date(this._state.timerStat.startTime)).getTime());
+    }
+
+    resumeTimer(){
+        if (this._state.timerStat.isRunning){
+            let intervalId = setInterval(() => {
+                    this.intervalAction();
+                }, 1000);
+            
+            this.updateTimerStat({ 
+                    isRunning: true, 
+                    taskId: this.getActiveTaskId(),
+                    timerMode: this.getTimerMode(), 
+                    startTime: this.getStartTime(),
+                    timerIntervalId: intervalId
+                });
+        }
     }
 
     persistToStorage() {
@@ -71,10 +87,12 @@ class TimerStatStore extends EventEmitter {
         this.emit('change');
     }
 
+
+
     handleAction(action) {
         switch(action.type)
         {
-            case TimerConfigActionTypes.START_TIMER:
+            case TimerStatActionTypes.START_TIMER:
 
                 let intervalId = setInterval(() => {
                     this.intervalAction();
@@ -90,7 +108,7 @@ class TimerStatStore extends EventEmitter {
                 
                 break;
 
-            case TimerConfigActionTypes.STOP_TIMER:
+            case TimerStatActionTypes.STOP_TIMER:
 
                 //stop interval
                 if (this._state.timerStat.timerIntervalId != null)
@@ -100,7 +118,7 @@ class TimerStatStore extends EventEmitter {
                 this.emit('change');
                 break;
 
-            case TimerConfigActionTypes.RESET_TIMER:
+            case TimerStatActionTypes.RESET_TIMER:
 
                 //stop interval
                 if (this._state.timerStat.timerIntervalId != null)
@@ -110,7 +128,7 @@ class TimerStatStore extends EventEmitter {
                 this.emit('change');
                 break;
 
-            case TimerConfigActionTypes.COMPLETE_TIMER:
+            case TimerStatActionTypes.COMPLETE_TIMER:
 
                 //stop interval
                 if (this._state.timerStat.timerIntervalId != null && 

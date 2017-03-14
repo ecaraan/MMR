@@ -76,11 +76,12 @@ class TaskStore extends EventEmitter {
                
         let itemToUpdate = _.find(this._state.tasks, ['Id', task.id]);
 
-        itemToUpdate.Name = task.name,
-        itemToUpdate.Description = task.description,
-        itemToUpdate.Priority = task.priority,
-        itemToUpdate.Status = task.status,
-        itemToUpdate.Timer = task.timer
+        itemToUpdate.Name = task.name;
+        itemToUpdate.Description = task.description;
+        itemToUpdate.Priority = task.priority;
+        itemToUpdate.Status = task.status;
+        itemToUpdate.Timer = task.timer;
+        itemToUpdate.Duration = task.duration;
 
         this.persistToStorage();
     }

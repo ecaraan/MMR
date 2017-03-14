@@ -25,8 +25,8 @@ class TimerManager {
 
     stopTimer(taskId, timerMode){
         if(TimerStatStore.isRunning() &&
-            TimerStatStore.activeTaskId == taskId &&
-            TimerStatStore.timerMode == timerMode){
+            TimerStatStore.getActiveTaskId() == taskId &&
+            TimerStatStore.getTimerMode() == timerMode){
             
             this.updateDuration(taskId, timerMode);
 
@@ -36,8 +36,8 @@ class TimerManager {
 
     resetTimer(taskId, timerMode) {
         if(TimerStatStore.isRunning() &&
-            TimerStatStore.activeTaskId == taskId &&
-            TimerStatStore.timerMode == timerMode){
+            TimerStatStore.getActiveTaskId() == taskId &&
+            TimerStatStore.getTimerMode() == timerMode){
             
             TimerStatAction.resetTimer();
         }
@@ -48,7 +48,7 @@ class TimerManager {
         //if there's an active timer and pertains to the task where Complete was triggered, 
         //stop it first and add elapsed time to duration
         if(TimerStatStore.isRunning() &&
-            TimerStatStore.activeTaskId == taskId)
+            TimerStatStore.getActiveTaskId() == taskId)
         {
             this.updateDuration(taskId, timerMode);
         }
@@ -74,7 +74,7 @@ class TimerManager {
 
             if (task != null)
             {
-                task.Duration += ((new Date()).getTime()) - TimerStatStore.startTime.getTime();
+                task.Duration += ((new Date()).getTime()) - (new Date(TimerStatStore.getStartTime())).getTime();
                 TaskAction.updateTask(task);
             }
         }
@@ -90,4 +90,4 @@ class TimerManager {
 
 }
 
-export default TimerManager;
+export default new TimerManager;
