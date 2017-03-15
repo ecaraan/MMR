@@ -18,7 +18,8 @@ class TaskForm extends React.Component{
             description: '',
             priority: '0',
             status: '0',
-            timer: dTimer
+            timer: dTimer,
+            showErrors: false
         }
     }
     
@@ -43,21 +44,33 @@ class TaskForm extends React.Component{
     }
 
     handleAddTask(){
-        TaskAction.addTask({
-            name : this.state.name,
-            description : this.state.description,
-            priority : parseInt(this.state.priority),
-            status : parseInt(this.state.status),
-            timer: parseInt(this.state.timer)
-        });
-        
-        this.props.postAddAction();
+
+        if (this.state.name.trim().length > 0)
+        {
+            TaskAction.addTask({
+                name : this.state.name,
+                description : this.state.description,
+                priority : parseInt(this.state.priority),
+                status : parseInt(this.state.status),
+                timer: parseInt(this.state.timer)
+            });
+            
+            this.props.postAddAction();
+        }
+        else{
+            this.setState({ showErrors: true });
+        }
     }
 
     render() {
 
         return (
             <div>
+                { this.state.showErrors ?
+                    <div className="form-group">
+                        <h4><span className="label label-danger">Name is required.</span></h4>                 
+                    </div> : <div></div>      
+                }        
                 <div className="form-group">
                     <input className="form-control" 
                         placeholder="Enter Task Name"

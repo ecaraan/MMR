@@ -8,17 +8,19 @@ import * as TimerUtil from '../utils/TimerUtil';
 import { Modal } from 'react-bootstrap';
 
 class Timer extends React.Component {
-    constructor(){
-        super();
+    constructor(props){
+        super(props);
 
         this.handleTimerStatChange = this.handleTimerStatChange.bind(this);
         this.getCountDownTimerText = this.getCountDownTimerText.bind(this);
         this.updateDuration = this.updateDuration.bind(this);
         this.mapData = this.mapData.bind(this);
         this.closeMessage = this.closeMessage.bind(this);
+        this.getTimerETC = this.getTimerETC.bind(this);
+        this.getElapsedTime = this.getElapsedTime.bind(this);
 
         let timerStat = TimerStatStore.getStat();
-
+               
         this.state = {
             taskId: timerStat.taskId,
             timer: null,
@@ -38,8 +40,15 @@ class Timer extends React.Component {
         TimerStatStore.resumeTimer();
     }
 
-    handleTimerStatChange() {
-        this.setState ({ countDownTimerText: this.getCountDownTimerText(this.state.taskId, this.state.activeTimer) })
+    handleTimerStatChange() {        
+        this.setState ({ countDownTimerText: this.getCountDownTimerText(this.state.taskId, this.state.activeTimer) });
+        if (TimerStatStore.isTimerExpired()) {
+            let timerStat = TimerStatStore.getPreviousTimerStat();
+
+            if (timerStat)
+                this.updateDuration(timerStat.taskId, timerStat.timerMode, timerStat.timerETC);
+
+        }        
     }
 
     componentWillMount() {
@@ -61,11 +70,14 @@ class Timer extends React.Component {
 
                 let status = _.find(TaskStore.getStatusEnum(), ['Name', 'In Progress']);                 
                 let task = TaskStore.getTask(this.state.taskId);
+                let selectedTaskTimer = TimerConfigStore.getTimerConfig(task.Timer);
 
                 task.Status = status.Id;
                 TaskAction.updateTask(this.mapData(task));
 
-                TimerStatAction.startTimer(this.state.taskId, this.state.activeTimer);
+                TimerStatAction.startTimer(this.state.taskId, 
+                                            this.state.activeTimer, 
+                                            TimerUtil.MinuteToMillisecond(this.getTimerETC()));
 
                 return true;
             }
@@ -89,7 +101,7 @@ class Timer extends React.Component {
             TimerStatStore.getActiveTaskId() == this.state.taskId &&
             TimerStatStore.getTimerMode() == this.state.activeTimer){
             
-            this.updateDuration(this.state.taskId, this.state.activeTimer);
+            this.updateDuration(this.state.taskId, this.state.activeTimer, this.getElapsedTime());
 
             TimerStatAction.stopTimer();
         }
@@ -110,7 +122,7 @@ class Timer extends React.Component {
         if(TimerStatStore.isRunning() &&
             TimerStatStore.getActiveTaskId() == this.state.taskId)
         {
-            this.updateDuration(this.state.taskId, TimerStatStore.getTimerMode());
+            this.updateDuration(this.state.taskId, TimerStatStore.getTimerMode(), this.getElapsedTime());
         }
         
         //Set task's status to 'Done'
@@ -185,14 +197,27 @@ class Timer extends React.Component {
             return '00:00:00';
     }
 
-    updateDuration(taskId, timerMode){
+    getTimerETC() {
+        switch(this.state.activeTimer)
+        {
+            case 'pomodoro': return this.state.timer.pomodoro
+            case 'shortbreak': return this.state.timer.shortBreak
+            case 'longbreak': return this.state.timer.longBreak
+        }
+    }
+
+    getElapsedTime() {
+        return (new Date()).getTime() - (new Date(TimerStatStore.getStartTime())).getTime();
+    }
+
+    updateDuration(taskId, timerMode, elapsedTime){
         //update duration if mode is pomodoro or shortbreak
         if (timerMode == 'pomodoro' || timerMode == 'shortbreak'){
             let task = TaskStore.getTask(taskId);
 
             if (task != null)
             {
-                task.Duration += ((new Date()).getTime()) - (new Date(TimerStatStore.getStartTime())).getTime();
+                task.Duration += elapsedTime;
                 TaskAction.updateTask(this.mapData(task));
             }
         }

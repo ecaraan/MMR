@@ -8,7 +8,7 @@ class Dashboard extends React.Component{
             <div>
                 <div className="row">
                     <div className="col-md-3">
-                        <Timer />
+                        <Timer taskId={this.props.location.query.tid} />
                     </div>
                     <div className="col-md-9">
                         <Tasks uncompletedOnly="true" />

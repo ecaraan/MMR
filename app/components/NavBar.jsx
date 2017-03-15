@@ -17,7 +17,6 @@ class NavBar extends React.Component{
                         </ul>                        
                         <ul className="nav navbar-nav navbar-right">                            
                             <PriorityPopOverMenu />
-                            <NavLink to="/about">Add Task</NavLink> 
                         </ul>
                     </div>
                 </div>

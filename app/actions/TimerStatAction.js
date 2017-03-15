@@ -1,11 +1,12 @@
 import Dispatcher from '../dispatcher';
 import TimerStatActionTypes from '../constants/TimerStatActionTypes';
 
-export function startTimer(taskId, timerMode){
+export function startTimer(taskId, timerMode, timerETC){
     Dispatcher.dispatch({
         type: TimerStatActionTypes.START_TIMER,
         taskId: taskId,
-        timerMode: timerMode
+        timerMode: timerMode,
+        timerETC: timerETC
     });
 }
 
