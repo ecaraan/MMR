@@ -1,5 +1,6 @@
 import React from 'react';
 import _  from 'lodash';
+import { Link } from 'react-router';
 import { Modal } from 'react-bootstrap';
 import Pagination from './Pagination.jsx';
 import TaskForm from './TaskForm.jsx';
@@ -216,7 +217,7 @@ class Tasks extends React.Component{
                                     </button>
                                     <button className="btn btn-danger" onClick={() => this.toggleEditing(0)}>
                                         <span className="glyphicon glyphicon-remove"></span>
-                                    </button>
+                                    </button>                                    
                                 </div>
                             </div>                            
                         </td>
@@ -240,6 +241,11 @@ class Tasks extends React.Component{
                                     </button>
                                     <button className="btn btn-danger" onClick={() => this.confirmRemove(item.Id)}>
                                         <span className="glyphicon glyphicon-trash"></span>
+                                    </button>
+                                    <button className="btn btn-warning">
+                                        <Link to={{pathname: '/dashboard', query: {'tid': item.Id}}}>
+                                            <span className="glyphicon glyphicon-time"></span>
+                                        </Link>
                                     </button>
                                 </div>
                             </div>                            

@@ -122,7 +122,7 @@ class TaskForm extends React.Component{
                 </div>
                 <hr/>
                 <div className="modal-action-buttons">
-                    <button onClick={this.handleAddTask.bind(this)} className="btn btn-primary">Add</button>&nbsp;&nbsp;
+                    <button onClick={this.handleAddTask.bind(this)} className="btn btn-primary">Add</button>
                     <button onClick={this.props.closeForm} className="btn btn-secondary">Cancel</button>
                 </div>                                
             </div>

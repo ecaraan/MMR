@@ -68,6 +68,10 @@ class TimerStatStore extends EventEmitter {
 
     resumeTimer(){
         if (this._state.timerStat.isRunning){
+
+            //clear previous timer
+            clearInterval(this._state.timerStat.timerIntervalId);
+
             let intervalId = setInterval(() => {
                     this.intervalAction();
                 }, 1000);

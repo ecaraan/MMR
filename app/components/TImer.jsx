@@ -16,28 +16,27 @@ class Timer extends React.Component {
         this.updateDuration = this.updateDuration.bind(this);
         this.mapData = this.mapData.bind(this);
         this.closeMessage = this.closeMessage.bind(this);
+        this.getTimer = this.getTimer.bind(this);
         this.getTimerETC = this.getTimerETC.bind(this);
         this.getElapsedTime = this.getElapsedTime.bind(this);
+        this.changeTask = this.changeTask.bind(this);
+        this.viewRunningTimer = this.viewRunningTimer.bind(this);
 
         let timerStat = TimerStatStore.getStat();
+        let tId = props.taskId ? parseInt(props.taskId) : timerStat.taskId;
+        let tMode = props.timerMode ? props.timerMode : timerStat.timerMode;
                
         this.state = {
-            taskId: timerStat.taskId,
-            timer: null,
-            activeTimer: timerStat.timerMode,
-            pomodoroStartTime: 0,
-            pomodoroEndTime: 0,
-            shortBreakStartTime: 0,
-            shortBreakEndTime: 0,
-            longBreakStartTime: 0,
-            longBreakEndTime: 0,
-            countDownTimerText: this.getCountDownTimerText(timerStat.taskId, timerStat.timerMode),
+            taskId: tId,
+            timer: tId > 0 ? this.getTimer(tId) : null,
+            activeTimer: tMode,         
+            countDownTimerText: this.getCountDownTimerText(tId, tMode),
             message: '',
             isMessageVisible : false
         }
 
         this.errorMessage = '';
-        TimerStatStore.resumeTimer();
+        TimerStatStore.resumeTimer();       
     }
 
     handleTimerStatChange() {        
@@ -57,6 +56,19 @@ class Timer extends React.Component {
 
     componentWillUnmount() {
         TimerStatStore.removeListener('change', this.handleTimerStatChange);
+    }
+
+    componentWillReceiveProps(nextprops){
+        if(nextprops.taskId){
+            let tId = parseInt(nextprops.taskId);
+            if (tId != this.state.taskId){
+                this.changeTask(tId, nextprops.timerMode ? nextprops.timerMode : 'pomodoro');
+            }
+        }
+        else{
+            let timerStat = TimerStatStore.getStat();
+            this.changeTask(timerStat.taskId, timerStat.timerMode);
+        }
     }
 
     handleClickTimerType(timerType) {
@@ -140,20 +152,39 @@ class Timer extends React.Component {
     }
 
     handleChangeTask(e) {
-        let selectedTaskId = parseInt(e.target.value);
-        let selectedTask = TaskStore.getTask(selectedTaskId);
-        let selectedTaskTimer = TimerConfigStore.getTimerConfig(selectedTask.Timer);
+        this.changeTask(parseInt(e.target.value), 'pomodoro');
+    }
+
+    changeTask(taskId, timerMode){
+        
+        let selectedTaskTimer = this.getTimer(taskId);
 
         this.setState({
-            activeTimer: 'pomodoro',
-            taskId: selectedTaskId,
+            activeTimer: timerMode ? timerMode : 'pomodoro',
+            taskId: taskId,
             timer: selectedTaskTimer ? {
                     pomodoro: selectedTaskTimer.pomodoro,
                     shortBreak: selectedTaskTimer.shortBreak,
                     longBreak: selectedTaskTimer.longBreak
                 }: null,
-            countDownTimerText: this.getCountDownTimerText(selectedTaskId, 'pomodoro')
+            countDownTimerText: this.getCountDownTimerText(taskId, 'pomodoro')
         });
+    }
+
+    viewRunningTimer() {
+        let timerStat = TimerStatStore.getStat();
+        this.changeTask(timerStat.taskId, timerStat.timerMode);
+
+        this.closeMessage();
+    }
+
+    getTimer(taskId){
+        let selectedTask = TaskStore.getTask(taskId);
+
+        if (selectedTask)
+            return TimerConfigStore.getTimerConfig(selectedTask.Timer);
+
+        return null;
     }
 
     closeMessage() {
@@ -164,37 +195,40 @@ class Timer extends React.Component {
         if (taskId > 0)
         {
             let selectedTask = TaskStore.getTask(taskId);
-            let selectedTaskTimer = TimerConfigStore.getTimerConfig(selectedTask.Timer);
-            let activeTimerValue = 0;
 
-            if (selectedTaskTimer){
-                switch(timerMode){
-                    case 'pomodoro':
-                        activeTimerValue = selectedTaskTimer.pomodoro;
-                        break;
-                    
-                    case 'shortbreak':
-                        activeTimerValue = selectedTaskTimer.shortBreak;
-                        break;
-                    
-                    case 'longbreak':
-                        activeTimerValue = selectedTaskTimer.longBreak;
-                        break;
+            if (selectedTask){
+                let selectedTaskTimer = TimerConfigStore.getTimerConfig(selectedTask.Timer);
+                let activeTimerValue = 0;
+
+                if (selectedTaskTimer){
+                    switch(timerMode){
+                        case 'pomodoro':
+                            activeTimerValue = selectedTaskTimer.pomodoro;
+                            break;
+                        
+                        case 'shortbreak':
+                            activeTimerValue = selectedTaskTimer.shortBreak;
+                            break;
+                        
+                        case 'longbreak':
+                            activeTimerValue = selectedTaskTimer.longBreak;
+                            break;
+                    }
                 }
-            }
 
-            if (TimerStatStore.isRunning() &&
-                TimerStatStore.getActiveTaskId() == taskId &&
-                TimerStatStore.getTimerMode() == timerMode)
-            {
-                return TimerUtil.CountDownTime(parseInt(activeTimerValue) || 0, TimerStatStore.getElapsedTime());
-            }
-            else{
-                return TimerUtil.MinuteToTimer(parseInt(activeTimerValue) || 0);            
-            }        
+                if (TimerStatStore.isRunning() &&
+                    TimerStatStore.getActiveTaskId() == taskId &&
+                    TimerStatStore.getTimerMode() == timerMode)
+                {
+                    return TimerUtil.CountDownTime(parseInt(activeTimerValue) || 0, TimerStatStore.getElapsedTime());
+                }
+                else{
+                    return TimerUtil.MinuteToTimer(parseInt(activeTimerValue) || 0);            
+                }  
+            }      
         }
-        else
-            return '00:00:00';
+        
+        return '00:00:00';
     }
 
     getTimerETC() {
@@ -236,6 +270,24 @@ class Timer extends React.Component {
     }
 
     render() {
+
+        let modalButtons;
+
+        if (TimerStatStore.isRunning()){
+            modalButtons = (
+                <div className="modal-action-buttons">
+                    <button onClick={this.viewRunningTimer} className="btn btn-primary">View</button>
+                    <button onClick={this.closeMessage} className="btn btn-secondary">Cancel</button>
+                </div>
+            )
+        }
+        else{
+            modalButtons = (
+                <div className="modal-action-buttons">
+                    <button onClick={this.closeMessage} className="btn btn-primary">Ok</button>
+                </div>
+            )
+        }
 
         return (
             <div>
@@ -298,9 +350,7 @@ class Timer extends React.Component {
                         <p className="">{this.state.message}</p>
                     </Modal.Body>
                     <Modal.Footer>
-                        <div className="modal-action-buttons">
-                            <button onClick={this.closeMessage} className="btn btn-primary">Ok</button>
-                        </div>
+                        {modalButtons}
                     </Modal.Footer>
                 </Modal>
             </div>

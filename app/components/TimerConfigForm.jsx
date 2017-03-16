@@ -15,7 +15,8 @@ class TimerConfigForm extends React.Component{
             pomodoro: 0,
             shortBreak: 0,
             longBreak: 0,
-            isDefault: false
+            isDefault: false,
+            showErrors: false
         }
     }
     
@@ -53,15 +54,21 @@ class TimerConfigForm extends React.Component{
     }
 
     handleAddTimerConfig(){
-        TimerConfigAction.addTimerConfig({
-            name : this.state.name,
-            pomodoro: this.state.pomodoro,
-            shortBreak: this.state.shortBreak,
-            longBreak: this.state.longBreak,
-            isDefault: this.state.isDefault
-        });
-        
-        this.props.postAddAction();
+        if (this.state.name.trim().length > 0)
+        {
+            TimerConfigAction.addTimerConfig({
+                name : this.state.name,
+                pomodoro: this.state.pomodoro,
+                shortBreak: this.state.shortBreak,
+                longBreak: this.state.longBreak,
+                isDefault: this.state.isDefault
+            });
+            
+            this.props.postAddAction();
+        }
+        else{
+            this.setState({ showErrors: true });
+        }
     }
 
     handleFocus(e) {
@@ -72,6 +79,12 @@ class TimerConfigForm extends React.Component{
 
         return (
             <div>
+                { 
+                    this.state.showErrors ?
+                    <div className="form-group">
+                        <h4><span className="label label-danger">Name is required.</span></h4>                 
+                    </div> : <div></div>      
+                } 
                 <div className="form-group">
                     <input className="form-control" 
                         placeholder="Enter Timer Config Name"
@@ -113,7 +126,7 @@ class TimerConfigForm extends React.Component{
                 <button onClick={this.handleSetToDefault.bind(this)} className="btn btn-secondary">Use Default</button>
                 <hr/>
                 <div className="modal-action-buttons">
-                    <button onClick={this.handleAddTimerConfig.bind(this)} className="btn btn-primary">Add</button>&nbsp;&nbsp;                    
+                    <button onClick={this.handleAddTimerConfig.bind(this)} className="btn btn-primary">Add</button>
                     <button onClick={this.props.closeForm} className="btn btn-secondary">Cancel</button>
                 </div>                                
             </div>
