@@ -33,6 +33,7 @@ class MainLayout extends React.Component{
 
                 if (task){
                     let myColor = { background: '#50D10F', text: '#FFFFFF' };
+                    notify.show(`Timer for ${task.Name} completed.`, 'custom', 10000, myColor);
                 }
             }
         }   
