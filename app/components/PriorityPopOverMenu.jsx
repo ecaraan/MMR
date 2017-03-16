@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router';
 import { NavDropdown, MenuItem, OverlayTrigger, Button, Popover } from 'react-bootstrap';
 import TaskStore from '../stores/TaskStore';
 import _ from 'lodash';
@@ -9,16 +10,14 @@ class PriorityPopOverMenu extends React.Component{
         super();
 
         this.state = {
-            tList : TaskStore.getTasks()
+            tList : TaskStore.getUncompletedTasks()
         };
 
         this.setTasksFromStore = this.setTasksFromStore.bind(this);
-        //this.getIconColor =  this.getIconColor.bind(this);
-        //this.showPopOver = this.showPopOver.bind(this);
     }
 
     setTasksFromStore() {
-        this.setState({ tList: TaskStore.getTasks() });
+        this.setState({ tList: TaskStore.getUncompletedTasks() });
     }
 
     componentWillMount(){
@@ -54,8 +53,12 @@ class PriorityPopOverMenu extends React.Component{
     constructList(list) {
         return (
             list.map((item) => {
-                return (
-                    <li><i className="fa fa-clock-o" style={{color : this.getIconColor(item.Priority)}}></i> {item.Name}</li>
+                return (                    
+                    <li key={item.Id}>
+                        <Link className="btn" to={{pathname: '/dashboard', query: {'tid': item.Id}}}>
+                            <i className="fa fa-clock-o" style={{color : this.getIconColor(item.Priority)}}></i> {item.Name}
+                        </Link>
+                    </li>
                 )
             }) 
         )

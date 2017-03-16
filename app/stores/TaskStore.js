@@ -21,8 +21,18 @@ class TaskStore extends EventEmitter {
         }
     }
 
+    getTask(id){
+        return _.find(this._state.tasks, ['Id', id]);
+    }
+
     getTasks() {
         return this._state.tasks;
+    }
+
+    getUncompletedTasks() {
+        return _.filter(this._state.tasks, function(item) {
+            return item.Status < 3;
+        });
     }
 
     getPrioritiesEnum() {
@@ -35,7 +45,7 @@ class TaskStore extends EventEmitter {
 
     persistToStorage() {
         localStorage.setItem(taskLocalStorageName, JSON.stringify(this._state.tasks));
-    }
+    }    
 
     addTask(task) {
         
@@ -46,7 +56,9 @@ class TaskStore extends EventEmitter {
             Name : task.name,
             Description : task.description,
             Priority : task.priority,
-            Status : task.status
+            Status : task.status,
+            Timer: task.timer,
+            Duration: 0 //in milli-seconds
         });
 
         this.persistToStorage();
@@ -64,10 +76,12 @@ class TaskStore extends EventEmitter {
                
         let itemToUpdate = _.find(this._state.tasks, ['Id', task.id]);
 
-        itemToUpdate.Name = task.name,
-        itemToUpdate.Description = task.description,
-        itemToUpdate.Priority = task.priority,
-        itemToUpdate.Status = task.status
+        itemToUpdate.Name = task.name;
+        itemToUpdate.Description = task.description;
+        itemToUpdate.Priority = task.priority;
+        itemToUpdate.Status = task.status;
+        itemToUpdate.Timer = task.timer;
+        itemToUpdate.Duration = task.duration;
 
         this.persistToStorage();
     }

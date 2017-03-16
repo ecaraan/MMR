@@ -9,8 +9,8 @@ class Footer extends React.Component{
                 <div>                            
                     <div>                    
                         <div className="width-constraint clearfix">                         
-                            <p className="pull-left muted credit">Footer MMR v1.0.0</p>
-                            <p className="pull-right muted credit">©2017 • ALL RIGHTS RESERVED</p>
+                            <p className="pull-left muted credit">&nbsp;&nbsp;Footer MMR v1.0.0</p>
+                            <p className="pull-right muted credit">©2017 • ALL RIGHTS RESERVED&nbsp;&nbsp;</p>
                         </div>
                     </div>
                 </div> 

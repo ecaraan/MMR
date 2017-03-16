@@ -11,10 +11,12 @@ class NavBar extends React.Component{
                         <ul className="nav navbar-nav">
                             <NavLink to="/">Home</NavLink>
                             <NavLink to="/tasks">Tasks</NavLink>
-                            <NavLink to="/about">About</NavLink>                                         
+                            <NavLink to="/timer">Timer</NavLink>
+                            <NavLink to="/dashboard">Dashboard</NavLink>
+                            <NavLink to="/about">About</NavLink> 
                         </ul>                        
                         <ul className="nav navbar-nav navbar-right">                            
-                             <PriorityPopOverMenu />
+                            <PriorityPopOverMenu />
                         </ul>
                     </div>
                 </div>

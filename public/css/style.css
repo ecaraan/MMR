@@ -22,8 +22,34 @@
 
 .modal-action-buttons > button{
     min-width: 80px;
+    margin-right: 5px;
 }
 
 ul.pagination{
     margin-top: 0;
+}
+
+.timerbox{
+    padding: 20px;
+    margin: 25px;
+    background-color: #F5F5F5;
+    width: 100%;
+    text-align: center;
+    border-radius: 5px;
+}
+
+.timerbox select {
+    width: 100%;
+    margin-bottom: 20px;
+}
+
+.timerbox .timertext{
+    font-size: 55px;
+    font-weight: bold;
+    color: #BD362F;
+    margin: 20px;
+}
+
+.timerbox .btn-space{
+    margin-right: 5px;
 }

@@ -1,11 +1,13 @@
 import React from 'react';
 import _  from 'lodash';
+import { Link } from 'react-router';
 import { Modal } from 'react-bootstrap';
 import Pagination from './Pagination.jsx';
+import TaskForm from './TaskForm.jsx';
 import TaskStore from '../stores/TaskStore';
-import TaskPageStore from '../stores/TaskPageStore';
+import TimerConfigStore from '../stores/TimerConfigStore';
 import * as TaskAction from '../actions/TaskAction';
-import * as PageAction from '../actions/PageAction';
+import * as TimerUtil from '../utils/TimerUtil';
 
 class Tasks extends React.Component{
 
@@ -19,9 +21,9 @@ class Tasks extends React.Component{
             sortOrder: null,
             showModal: false,
             showConfirmModal: false,
-            currentPage: TaskPageStore.getCurrentPage(),
-            rowsPerPage: TaskPageStore.getRowsPerPage(),
-            tList : TaskStore.getTasks()
+            currentPage: this.getTasks().length > 0? 1 : 0,
+            rowsPerPage: 5,
+            tList : this.getTasks()
         }
 
         this.sortTable = this.sortTable.bind(this);
@@ -30,35 +32,47 @@ class Tasks extends React.Component{
         this.closeConfirmModal = this.closeConfirmModal.bind(this);
         this.openModal = this.openModal.bind(this);
 
-        this.handleAddTask = this.handleAddTask.bind(this);
         this.handleUpdateTask = this.handleUpdateTask.bind(this);
         this.handleRemoveTask = this.handleRemoveTask.bind(this);
+        this.handlePostAddAction = this.handlePostAddAction.bind(this);
 
         this.confirmRemove = this.confirmRemove.bind(this);
         
         this.toggleEditing = this.toggleEditing.bind(this);
 
         this.setTasksFromStore = this.setTasksFromStore.bind(this);
-        this.setPagingFromStore = this.setPagingFromStore.bind(this);
+        this.getTasks = this.getTasks.bind(this);
+        this.getValidPage = this.getValidPage.bind(this);
+
+        this.onPageChanged = this.onPageChanged.bind(this);
+        this.onRowsPerPageChanged = this.onRowsPerPageChanged.bind(this);
+    }
+
+    onPageChanged(page){
+        this.setState({ currentPage: page });
+    }
+
+    onRowsPerPageChanged(rowsPerPage){
+        this.setState({ rowsPerPage: rowsPerPage });   
+    }
+
+    getTasks(){
+        if (this.props.uncompletedOnly)
+            return TaskStore.getUncompletedTasks();
+        else
+            return TaskStore.getTasks();
     }
     
     setTasksFromStore() {
-        this.setState({ tList: TaskStore.getTasks() });
-    }
-
-    setPagingFromStore(){
-        this.setState({rowsPerPage: TaskPageStore.getRowsPerPage(), 
-            currentPage: TaskPageStore.getCurrentPage()});
+        this.setState({ tList: this.getTasks() });
     }
 
     componentWillMount() {
         TaskStore.on('change', this.setTasksFromStore);
-        TaskPageStore.on('change', this.setPagingFromStore);
     }
 
     componentWillUnmount() {
         TaskStore.removeListener('change', this.setTasksFromStore);
-        TaskPageStore.removeListener('change', this.setPagingFromStore);
     }
     
     sortTable(column){
@@ -79,7 +93,7 @@ class Tasks extends React.Component{
 
     }
 
-    closeModal() {
+    closeModal() {        
         this.setState({ showModal: false });
     }
 
@@ -91,33 +105,49 @@ class Tasks extends React.Component{
         this.setState({ showModal: true });
     }
 
-    getLastPage(totalRows, rowsPerPage) {
-        return Math.ceil(totalRows / rowsPerPage);
+    getLastPage() {
+        return Math.ceil(this.getTasks().length / this.state.rowsPerPage);
     }
 
-    handleAddTask(){
-        TaskAction.addTask({
-            name : this.refs['modal_taskName'].value,
-            description : this.refs['modal_taskDescription'].value,
-            priority : parseInt(this.refs['modal_taskPriority'].value),
-            status : parseInt(this.refs['modal_taskStatus'].value)
-        });
-        
-       PageAction.goToLastPage();
+    getValidPage(currentPage) {        
+        let lastPage = this.getLastPage()
 
-       this.setState({ showModal: false});
+        if (lastPage > 0)
+        {
+            let isCurrentPageValid = currentPage <= lastPage;
 
+            if (isCurrentPageValid){
+                return currentPage;
+            }
+            else {
+                if (currentPage > 1)
+                    this.getValidPage(currentPage - 1);
+                else
+                    return 1;
+            
+            }
+        }
+        else
+            return 0;
     }
 
+    handlePostAddAction(){
+        this.closeModal();
+        this.setState( { currentPage: this.getLastPage() });
+    }    
+    
     handleUpdateTask(){
         let id = this.state.itemToEditId;
+        let task = _.find(this.getTasks(), ['Id', id]);
 
         TaskAction.updateTask({
             id: id,
             name: this.refs['editName_' + id].value,
             description : this.refs['editDescription_' + id].value,
             priority : parseInt(this.refs['editPriority_' + id].value),
-            status : parseInt(this.refs['editStatus_' + id].value)
+            status : parseInt(this.refs['editStatus_' + id].value),
+            timer : parseInt(this.refs['editTimer_' + id].value),
+            duration : task.Duration
         })
 
         this.setState({ itemToEditId: null });        
@@ -125,17 +155,8 @@ class Tasks extends React.Component{
 
     handleRemoveTask(){
         TaskAction.deleteTask(this.state.taskToRemoveId);
-
-        //check if currentPage is valid
-        let isCurrentPageValid = this.state.currentPage <= this.getLastPage(TaskStore.getTasks().length, this.state.rowsPerPage);
-
-        if (isCurrentPageValid){
-            this.setState({ showConfirmModal: false});
-        }
-        else{
-            PageAction.goToPage(this.state.currentPage - 1);
-            this.setState({ showConfirmModal: false});
-        }        
+      
+        this.setState({ currentPage: this.getValidPage(this.state.currentPage), showConfirmModal: false});
     }
 
     confirmRemove(id){
@@ -151,6 +172,7 @@ class Tasks extends React.Component{
 
         let p = _.find(TaskStore.getPrioritiesEnum(), ['Id', item.Priority]);
         let s = _.find(TaskStore.getStatusEnum(), ['Id', item.Status]);
+        let t = _.find(TimerConfigStore.getTimerConfigs(), ['id', item.Timer]);
 
         if ( this.state.itemToEditId === item.Id ) {
              return  <tr key={item.Id}>
@@ -174,6 +196,19 @@ class Tasks extends React.Component{
                                 <option value="3">Done</option>                          
                             </select>
                         </td>
+                        <td>{TimerUtil.MillisecodsToText2(item.Duration)}</td>
+                        <td>
+                            <select ref={`editTimer_${item.Id}`} defaultValue={item.Timer || "0"} className="form-control">
+                                <option value="0" disabled hidden>Timer</option>
+                                {
+                                    TimerConfigStore.getTimerConfigs().map((item) => {
+                                        return (
+                                            <option value={item.id}>{item.name}</option>
+                                        )
+                                    })
+                                }                          
+                            </select>
+                        </td>
                         <td>
                             <div className="btn-toolbar" role="toolbar">
                                 <div className="btn-group" role="group">
@@ -182,7 +217,7 @@ class Tasks extends React.Component{
                                     </button>
                                     <button className="btn btn-danger" onClick={() => this.toggleEditing(0)}>
                                         <span className="glyphicon glyphicon-remove"></span>
-                                    </button>
+                                    </button>                                    
                                 </div>
                             </div>                            
                         </td>
@@ -196,6 +231,8 @@ class Tasks extends React.Component{
                         </td>
                         <td>{p ? p.Name : ''}</td>
                         <td>{s ? s.Name : ''}</td>
+                        <td>{TimerUtil.MillisecodsToText2(item.Duration)}</td>
+                        <td>{t ? t.name : ''}</td>
                         <td>
                             <div className="btn-toolbar" role="toolbar">
                                 <div className="btn-group" role="group">
@@ -205,6 +242,9 @@ class Tasks extends React.Component{
                                     <button className="btn btn-danger" onClick={() => this.confirmRemove(item.Id)}>
                                         <span className="glyphicon glyphicon-trash"></span>
                                     </button>
+                                    <Link className="btn btn-warning" to={{pathname: '/dashboard', query: {'tid': item.Id}}}>                                                                            
+                                        <span className="glyphicon glyphicon-time"></span>  
+                                    </Link>
                                 </div>
                             </div>                            
                         </td>
@@ -242,6 +282,8 @@ class Tasks extends React.Component{
                                     <a href="#" onClick={() => this.sortTable('Status')}>Status </a>
                                     <i className={`fa ${this.state.sortColumn == 'Status' ? 'fa-sort-' + this.state.sortOrder : 'fa-sort'}`}></i>
                                 </th>
+                                <th>Duration</th>
+                                <th>Timer</th>
                                 <th></th>
                             </tr>
                         </thead>
@@ -254,7 +296,11 @@ class Tasks extends React.Component{
                             <button className="btn btn-primary" onClick={this.openModal}>Add New</button>
                          </div>
                          <div className="col-md-3">
-                            <Pagination />
+                            <Pagination currentPage={this.state.currentPage}
+                                    totalRows={this.getTasks().length}
+                                    rowsPerPage={this.state.rowsPerPage}
+                                    onPageChanged={this.onPageChanged}
+                                    onRowsPerPageChanged={this.onRowsPerPageChanged}/>
                          </div>
                     </div>
                     <Modal show={this.state.showModal} onHide={this.closeModal}>
@@ -262,37 +308,8 @@ class Tasks extends React.Component{
                             <Modal.Title>Add New Task</Modal.Title>
                         </Modal.Header>
                         <Modal.Body>
-                            <form>
-                                <div className="form-group">
-                                    <input ref="modal_taskName" className="form-control" placeholder="Enter Task Name" />  
-                                </div>   
-                                <div className="form-group">                           
-                                    <textarea ref="modal_taskDescription" className="form-control" placeholder="Enter Task Description" />                                    
-                                </div>
-                                <div className="form-group"> 
-                                    <select placeholder="select" ref="modal_taskPriority" className="form-control">
-                                        <option value="0" disabled selected hidden>Priority</option>
-                                        <option value="1">Low</option>
-                                        <option value="2">Medium</option>
-                                        <option value="3">High</option>
-                                    </select> 
-                                </div>
-                                <div className="form-group"> 
-                                    <select placeholder="select" ref="modal_taskStatus" className="form-control">
-                                        <option value="" disabled selected hidden>Status</option>
-                                        <option value="1">To Do</option>
-                                        <option value="2">In Progress</option>
-                                        <option value="3">Done</option>
-                                    </select> 
-                                </div>                                  
-                            </form>
+                            <TaskForm postAddAction={this.handlePostAddAction} closeForm={this.closeModal} />
                         </Modal.Body>
-                        <Modal.Footer>
-                            <div className="modal-action-buttons">
-                                <button onClick={this.handleAddTask} className="btn btn-primary">Add</button>
-                                <button onClick={this.closeModal} className="btn btn-secondary">Cancel</button>
-                            </div>
-                        </Modal.Footer>
                     </Modal>
                     <Modal show={this.state.showConfirmModal} onHide={this.closeConfirmModal}>
                         <Modal.Header closeButton>
@@ -312,6 +329,10 @@ class Tasks extends React.Component{
             </div>            
         );
     }
+}
+
+Tasks.defaultProps = {
+    uncompletedOnly: false
 }
 
 export default Tasks;
