@@ -242,9 +242,13 @@ class Tasks extends React.Component{
                                     <button className="btn btn-danger" onClick={() => this.confirmRemove(item.Id)}>
                                         <span className="glyphicon glyphicon-trash"></span>
                                     </button>
-                                    <Link className="btn btn-warning" to={{pathname: '/dashboard', query: {'tid': item.Id}}}>                                                                            
-                                        <span className="glyphicon glyphicon-time"></span>  
-                                    </Link>
+                                    { 
+                                        this.props.uncompletedOnly ?
+                                        <Link className="btn btn-warning" to={{pathname: '/dashboard', query: {'tid': item.Id}}}>                                                                            
+                                            <span className="glyphicon glyphicon-time"></span>  
+                                        </Link>
+                                        : null
+                                    }
                                 </div>
                             </div>                            
                         </td>
