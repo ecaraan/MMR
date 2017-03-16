@@ -66,7 +66,8 @@ class TaskForm extends React.Component{
 
         return (
             <div>
-                { this.state.showErrors ?
+                { 
+                    this.state.showErrors ?
                     <div className="form-group">
                         <h4><span className="label label-danger">Name is required.</span></h4>                 
                     </div> : <div></div>      

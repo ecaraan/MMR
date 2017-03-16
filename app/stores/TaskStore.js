@@ -45,7 +45,7 @@ class TaskStore extends EventEmitter {
 
     persistToStorage() {
         localStorage.setItem(taskLocalStorageName, JSON.stringify(this._state.tasks));
-    }
+    }    
 
     addTask(task) {
         

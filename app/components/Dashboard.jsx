@@ -11,10 +11,8 @@ class Dashboard extends React.Component{
             timerMode : this.props.location.query.tmode
         }
     }
-    componentWillReceiveProps(nextProps) {
-        //if (typeof nextProps.location.query.tid != 'undefined')
-            this.setState({ taskId: nextProps.location.query.tid });
-        //else 
+    componentWillReceiveProps(nextProps) {        
+        this.setState({ taskId: nextProps.location.query.tid });
     }
     render() {
         return (

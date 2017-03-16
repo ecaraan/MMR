@@ -40,14 +40,7 @@ class Timer extends React.Component {
     }
 
     handleTimerStatChange() {        
-        this.setState ({ countDownTimerText: this.getCountDownTimerText(this.state.taskId, this.state.activeTimer) });
-        if (TimerStatStore.isTimerExpired()) {
-            let timerStat = TimerStatStore.getPreviousTimerStat();
-
-            if (timerStat)
-                this.updateDuration(timerStat.taskId, timerStat.timerMode, timerStat.timerETC);
-
-        }        
+        this.setState ({ countDownTimerText: this.getCountDownTimerText(this.state.taskId, this.state.activeTimer) });        
     }
 
     componentWillMount() {

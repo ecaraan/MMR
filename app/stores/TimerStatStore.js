@@ -2,6 +2,8 @@ import { EventEmitter } from 'events';
 import Dispatcher from '../dispatcher';
 import TimerStatActionTypes from '../constants/TimerStatActionTypes';
 import _ from 'lodash';
+import TaskStore from '../stores/TaskStore';
+import * as TaskAction from '../actions/TaskAction';
 
 const timerStatLocalStorageName = 'mmr_timerstat';
 
@@ -107,11 +109,36 @@ class TimerStatStore extends EventEmitter {
         this.persistToStorage();
     }
 
+    updateDuration(taskId, timerMode, elapsedTime){
+        //update duration if mode is pomodoro or shortbreak
+        if (timerMode == 'pomodoro' || timerMode == 'shortbreak'){
+            let task = TaskStore.getTask(taskId);
+
+            if (task != null)
+            {
+                task.Duration += elapsedTime;
+                TaskAction.updateTask({
+                        id: task.Id,
+                        name: task.Name,
+                        description : task.Description,
+                        priority : task.Priority,
+                        status : task.Status,
+                        timer : task.Timer,
+                        duration : task.Duration            
+                });
+            }
+        }
+    }
+
     intervalAction() {
         //check if elapsedTime is less than or equal to ETC
         if (this.isElapsedEqualETC()){
             this._state.previousTimerStat = _.clone(this._state.timerStat);            
             this._state.isTimerExpired = true;
+              
+            this.updateDuration(this._state.timerStat.taskId, 
+                                this._state.timerStat.timerMode, 
+                                this._state.timerStat.timerETC);
             this.endTimer();
         }
 

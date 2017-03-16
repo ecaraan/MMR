@@ -242,11 +242,9 @@ class Tasks extends React.Component{
                                     <button className="btn btn-danger" onClick={() => this.confirmRemove(item.Id)}>
                                         <span className="glyphicon glyphicon-trash"></span>
                                     </button>
-                                    <button className="btn btn-warning">
-                                        <Link to={{pathname: '/dashboard', query: {'tid': item.Id}}}>
-                                            <span className="glyphicon glyphicon-time"></span>
-                                        </Link>
-                                    </button>
+                                    <Link className="btn btn-warning" to={{pathname: '/dashboard', query: {'tid': item.Id}}}>                                                                            
+                                        <span className="glyphicon glyphicon-time"></span>  
+                                    </Link>
                                 </div>
                             </div>                            
                         </td>
